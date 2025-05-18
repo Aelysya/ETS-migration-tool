@@ -33,18 +33,29 @@ end
 
 # Get the list of existing entities in a specified directory for comparison purposes
 # @param directory [String] directory where to list the entities
+# @return the list of existing entities
 def read_existing_entities(directory)
-  full_path = File.join($datapacks_path, 'Data/Studio', directory)
-
+  dir_path = File.join($datapacks_path, 'Data/Studio', directory)
   entities = []
 
-  Dir.entries(full_path).each do |file|
-    next unless File.file?(File.join(full_path, file))
+  Dir.entries(dir_path).each do |file|
+    full_path = File.join(dir_path, file)
+    next unless File.file?(full_path)
 
-    entities << File.basename(file, '.*')
+    entities << JSON.parse(File.read(full_path))
   end
-
   return entities
+end
+
+# Find if an entity already exists in the Gen 9 pack
+# @param essentials_entity [String] entity's name in Essentials
+# @param existing_entities [String] list of existing entities of the same type
+# @return the existing entity if it exists, nil otherwise
+def find_existing_entity(essentials_entity, existing_entities)
+  existing_entities.each do |a|
+    return a if a['dbSymbol'].gsub(/_/, '') == essentials_entity
+  end
+  return nil
 end
 
 # Save the JSON data into a new file

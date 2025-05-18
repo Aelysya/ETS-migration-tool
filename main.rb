@@ -28,5 +28,5 @@ Dir.glob('migrations/*.rb').sort.each do |file|
 end
 
 prepare_folders
-migrate_abilities
-# migrate_types
+# migrate_abilities
+migrate_types

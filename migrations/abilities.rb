@@ -1,10 +1,10 @@
-# Migrate Pokemon Essentials abilities into Pokemon Studio format
+# Migrate Essentials abilities into Studio format
 def migrate_abilities
   File.open(File.join($essentials_path, 'Data/abilities.dat'), 'rb') do |f|
     data = Marshal.load(f)
     existing_abilities = read_existing_entities('abilities')
 
-    i = 1
+    i = 0
     data.each_value do |ability|
       ability_name = ability.id.downcase.to_s
 
@@ -12,21 +12,21 @@ def migrate_abilities
       next i += 1 if ability_name == 'asonegrimneigh'
 
       if ability_name == 'asonechillingneigh'
-        final_name = 'as_one'
+        db_symbol = 'as_one'
       else
-        existing_name = find_existing_entity(ability_name, existing_abilities)
-        final_name = existing_name.nil? ? ability_name : existing_name
+        existing_ability = find_existing_entity(ability_name, existing_abilities)
+        db_symbol = existing_ability.nil? ? ability_name : existing_ability['dbSymbol']
       end
 
       json = {
         klass: 'Ability',
         id: i,
-        dbSymbol: final_name,
+        dbSymbol: db_symbol,
         textId: i
       }
 
       i += 1
-      save_json("Data/Studio/abilities/#{final_name}.json", json)
+      save_json("Data/Studio/abilities/#{db_symbol}.json", json)
     end
   end
 end
