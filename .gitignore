@@ -1,0 +1,4 @@
+.rubocop.yml
+settings.local.json
+
+output/*
