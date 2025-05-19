@@ -17,7 +17,7 @@ def migrate_types
       json = {
         textId: type_exists ? existing_type['textId'] : i,
         klass: 'Type',
-        id: type_exists ? existing_type['id'] : i,
+        id: type_exists ? existing_type['id'] : i + 1,
         dbSymbol: db_symbol,
         color: type_exists ? existing_type['color'] : '#c3b5b2',
         damageTo: build_damage_to(data, type_name)
