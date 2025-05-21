@@ -52,7 +52,7 @@ def migrate_moves
         isWind: check_for_flag(move, 'Wind'),
         battleEngineAimedTarget: parse_move_target_mode(move.target.to_s),
         battleStageMod: parse_move_stats(move.function_code),
-        moveStatus: move_exists ? existing_move['moveStatus'] : parse_move_statuses(move.function_code),
+        moveStatus: parse_move_statuses(move.function_code),
         effectChance: move.effect_chance.clamp(0, 100)
       }
 

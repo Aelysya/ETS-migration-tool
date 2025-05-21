@@ -30,4 +30,5 @@ end
 prepare_folders
 # migrate_abilities
 # migrate_types
-migrate_moves
+# migrate_moves
+migrate_dexes
