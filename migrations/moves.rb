@@ -64,6 +64,7 @@ end
 
 # Determine a move's category based on a number
 # @param move_category [Int] int-coded category of the move
+# @return [String] the determined category
 def parse_category(move_category)
   case move_category
   when 0
@@ -80,8 +81,6 @@ end
 # @return [String] the determined targetting mode
 def parse_move_target_mode(move_target_mode)
   case move_target_mode
-  when 'None', 'User'
-    return 'user'
   when 'NearAlly'
     return 'adjacent_ally'
   when 'UserOrNearAlly'
@@ -104,8 +103,7 @@ def parse_move_target_mode(move_target_mode)
     return 'any_other_pokemon'
   when 'AllBattlers', 'BothSides'
     return 'all_pokemon'
-  else
-    # TODO: add this outcome to the report
+  else # 'None', 'User', default
     return 'user'
   end
 end
@@ -129,7 +127,6 @@ def parse_be_method(move_function)
     return 's_bind' if move_function.include?('BindTarget')
     return 's_recoil' if move_function.include?('Recoil')
 
-    # TODO: add this outcome to the report
     return 's_basic'
   end
 end
@@ -245,17 +242,4 @@ def parse_stat(stat)
   when 'Eva', 'Evasion'
     return 'EVA_STAGE'
   end
-end
-
-# Check if a move contains a specific flag
-# @param move [Move] the move to check
-# @param flag [String] the flag to look for
-# @return [Boolean] whether the flag was found or not
-def check_for_flag(move, flag)
-  move.flags.each do |f|
-    next unless f == flag
-
-    return true
-  end
-  return false
 end

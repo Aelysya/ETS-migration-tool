@@ -1,4 +1,4 @@
-# Create the directory hierarchy where new files are created
+# Purge the output directory and create the directory hierarchy where new files will be created
 def prepare_folders
   FileUtils.rm_r('output') if Dir.exist?('output')
 
@@ -29,6 +29,19 @@ def prepare_folders
   FileUtils.mkdir('output/Data/Studio/moves')
   FileUtils.mkdir('output/Data/Studio/pokemon')
   FileUtils.mkdir('output/Data/Studio/types')
+end
+
+# Check if an entity contains a specific flag
+# @param entity [Object] the entity to check
+# @param flag [String] the flag to look for
+# @return [Boolean] whether the flag was found or not
+def check_for_flag(entity, flag)
+  entity.flags.each do |f|
+    next unless f == flag
+
+    return true
+  end
+  return false
 end
 
 # Get the list of existing entities in a specified directory for comparison purposes

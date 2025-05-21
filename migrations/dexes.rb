@@ -5,6 +5,8 @@ def migrate_dexes
 end
 
 # Migrate the National Pokédex
+# @note The National Pokedex is a special case because it's not contained in the usual regional_dexes.dat file,
+#   it instead is defined automatically by the Pokémon list in the order they are defined
 def migrate_national_dex
   File.open(File.join($essentials_path, 'Data/species.dat'), 'rb') do |f|
     data = Marshal.load(f)

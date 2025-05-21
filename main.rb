@@ -1,5 +1,6 @@
 require 'json'
 require 'fileutils'
+require_relative 'utils'
 
 $settings = JSON.parse(File.read('settings.local.json'))
 $essentials_path = $settings['essentials_path']
@@ -19,10 +20,6 @@ Dir.glob("#{dir}/*.rb").sort.each do |file|
   require file
 end
 
-Dir.glob('utils/*.rb').sort.each do |file|
-  require_relative file
-end
-
 Dir.glob('migrations/*.rb').sort.each do |file|
   require_relative file
 end
@@ -31,4 +28,5 @@ prepare_folders
 # migrate_abilities
 # migrate_types
 # migrate_moves
-migrate_dexes
+# migrate_dexes
+migrate_items
