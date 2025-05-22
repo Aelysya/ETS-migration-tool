@@ -1,0 +1,238 @@
+# Migrate Essentials trainers into Studio format
+def migrate_trainers
+  File.open(File.join($essentials_path, 'Data/trainers.dat'), 'rb') do |f|
+    data = Marshal.load(f)
+    # puts data.inspect
+
+    i = 0
+    data.each_value do |trainer|
+      trainer_type = find_trainer_type(trainer)
+      next i += 1 if trainer_type.nil?
+
+      db_symbol = "trainer_#{i}"
+
+      json = {
+        klass: 'TrainerBattleSetup',
+        id: i,
+        dbSymbol: db_symbol,
+        vsType: 1,
+        isCouple: false,
+        baseMoney: trainer_type.base_money,
+        bagEntries: build_bag_entries(trainer),
+        battleId: 0,
+        ai: parse_ai_level(trainer_type.skill_level),
+        party: build_party(trainer),
+        resources: {
+          sprite: trainer_type.id.to_s,
+          artworkFull: '',
+          artworkSmall: '',
+          character: "trainer_#{trainer_type.id}",
+          musics: {
+            encounter: trainer_type.intro_BGM || '',
+            victory: '',
+            defeat: trainer_type.victory_BGM || '',
+            bgm: trainer_type.battle_BGM || ''
+          }
+        },
+        additionalDialogs: []
+      }
+
+      i += 1
+      save_json("Data/Studio/trainers/#{db_symbol}.json", json)
+    end
+  end
+end
+
+# Find the corresponding trainer type of a trainer
+# @param trainer [Object] the trainer from Essentials
+# @return [Object] the trainer type object
+def find_trainer_type(trainer)
+  File.open(File.join($essentials_path, 'Data/trainer_types.dat'), 'rb') do |f|
+    data = Marshal.load(f)
+
+    data.each_value do |type|
+      return type if type.id.downcase.to_s == trainer.trainer_type.downcase.to_s
+    end
+    return nil
+  end
+end
+
+# Build the bag of a trainer
+# @param trainer [Object] the trainer from Essentials
+# @return [Array] the bag of the trainer
+def build_bag_entries(trainer)
+  existing_items = read_existing_entities('items')
+  used_items = []
+  bag_entries = []
+
+  trainer.items.each do |item|
+    item_name = item.downcase.to_s
+    existing_item = find_existing_entity(item_name, existing_items)
+    item_exists = !existing_item.nil?
+    db_symbol = item_exists ? existing_item['dbSymbol'] : item_name
+    next if used_items.include?(item_name)
+
+    used_items << item_name
+
+    bag_entries << {
+      id: db_symbol,
+      quantity: trainer.items.count(item)
+    }
+  end
+  return bag_entries
+end
+
+# Build the Pokémon party of a trainer
+# @param trainer [Object] the trainer from Essentials
+# @return [Array] the party of the trainer
+def build_party(trainer)
+  existing_species = read_existing_entities('pokemon')
+  party = []
+
+  trainer.pokemon.each do |pokemon|
+    pokemon_name = pokemon[:species].downcase.to_s
+    existing_pokemon = find_existing_entity(pokemon_name, existing_species)
+    pokemon_exists = !existing_pokemon.nil?
+    db_symbol = pokemon_exists ? existing_pokemon['dbSymbol'] : pokemon_name
+
+    expand_pokemon_setup = []
+    if pokemon[:ev].nil?
+      expand_pokemon_setup << { type: 'evs', value: { hp: 0, atk: 0, dfe: 0, spd: 0, ats: 0, dfs: 0 } }
+    else
+      expand_pokemon_setup << {
+        type: 'evs',
+        value: {
+          hp: pokemon[:ev][:HP].nil? ? 0 : pokemon[:ev][:HP],
+          atk: pokemon[:ev][:ATTACK].nil? ? 0 : pokemon[:ev][:ATTACK],
+          dfe: pokemon[:ev][:DEFENSE].nil? ? 0 : pokemon[:ev][:DEFENSE],
+          spd: pokemon[:ev][:SPECIAL_ATTACK].nil? ? 0 : pokemon[:ev][:SPECIAL_ATTACK],
+          ats: pokemon[:ev][:SPECIAL_DEFENSE].nil? ? 0 : pokemon[:ev][:SPECIAL_DEFENSE],
+          dfs: pokemon[:ev][:SPEED].nil? ? 0 : pokemon[:ev][:SPEED]
+        }
+      }
+    end
+
+    if pokemon[:iv].nil?
+      expand_pokemon_setup << { type: 'ivs', value: { hp: 0, atk: 0, dfe: 0, spd: 0, ats: 0, dfs: 0 } }
+    else
+      expand_pokemon_setup << {
+        type: 'ivs',
+        value: {
+          hp: pokemon[:iv][:HP].nil? ? 0 : pokemon[:iv][:HP],
+          atk: pokemon[:iv][:ATTACK].nil? ? 0 : pokemon[:iv][:ATTACK],
+          dfe: pokemon[:iv][:DEFENSE].nil? ? 0 : pokemon[:iv][:DEFENSE],
+          spd: pokemon[:iv][:SPECIAL_ATTACK].nil? ? 0 : pokemon[:iv][:SPECIAL_ATTACK],
+          ats: pokemon[:iv][:SPECIAL_DEFENSE].nil? ? 0 : pokemon[:iv][:SPECIAL_DEFENSE],
+          dfs: pokemon[:iv][:SPEED].nil? ? 0 : pokemon[:iv][:SPEED]
+        }
+      }
+    end
+
+    expand_pokemon_setup << { type: 'loyalty', value: pokemon[:happiness].nil? ? 70 : pokemon[:happiness] }
+    expand_pokemon_setup << { type: 'moves', value: build_pokemon_moveset(pokemon) }
+    expand_pokemon_setup << { type: 'originalTrainerName', value: trainer.real_name }
+    expand_pokemon_setup << { type: 'originalTrainerId', value: 0 }
+
+    expand_pokemon_setup << { type: 'ability', value: parse_pokemon_ability(pokemon) } unless pokemon[:ability].nil? && pokemon[:ability_index].nil?
+    expand_pokemon_setup << { type: 'givenName', value: pokemon[:real_name] } unless pokemon[:real_name].nil?
+    expand_pokemon_setup << { type: 'itemHeld', value: parse_pokemon_item(pokemon) } unless pokemon[:item].nil?
+    expand_pokemon_setup << { type: 'nature', value: pokemon[:nature].downcase } unless pokemon[:nature].nil?
+    expand_pokemon_setup << { type: 'gender', value: pokemon[:gender] + 1 } unless pokemon[:gender].nil? || pokemon[:gender] > 1
+    expand_pokemon_setup << { type: 'caughtWith', value: parse_pokemon_ball(pokemon) } unless pokemon[:poke_ball].nil?
+
+    if pokemon[:shininess].nil?
+      shiny_rate = 0
+    else
+      shiny_rate = pokemon[:shininess] ? 1 : 0
+    end
+
+    party << {
+      specie: db_symbol,
+      form: pokemon[:form].nil? ? 0 : pokemon[:form],
+      shinySetup: {
+        kind: 'rate',
+        rate: shiny_rate
+      },
+      levelSetup: {
+        kind: 'fixed',
+        level: pokemon[:level]
+      },
+      randomEncounterChance: 1,
+      expandPokemonSetup: expand_pokemon_setup
+    }
+  end
+  return party
+end
+
+# Determine the AI level of a trainer based on their skill level in Essentials
+# @param ai_level [Integer] the skill level of the trainer
+# @return [Integer] the parsed AI level
+def parse_ai_level(skill_level)
+  case skill_level
+  when 0
+    return 1
+  when 1..20
+    return 2
+  when 21..40
+    return 3
+  when 41..60
+    return 4
+  when 61..80
+    return 5
+  when 81..99
+    return 6
+  else
+    return 7
+  end
+end
+
+# Build the moveset of a Pokémon
+# @param pokemon [Object] the Pokémon from Essentials
+# @return [Array] the moveset of the Pokémon
+def build_pokemon_moveset(pokemon)
+  return %w[__undef__ __undef__ __undef__ __undef__] if pokemon[:moves].nil?
+
+  existing_moves = read_existing_entities('moves')
+  moveset = []
+
+  pokemon[:moves].each do |move|
+    existing_move = find_existing_entity(move.downcase.to_s, existing_moves)
+    db_symbol = existing_move.nil? ? move.downcase.to_s : existing_move['dbSymbol']
+    moveset << db_symbol
+  end
+
+  moveset << '__remove__' while moveset.size < 4
+  return moveset
+end
+
+# Determine the ability of a Pokémon
+# @param pokemon [Object] the Pokémon from Essentials
+# @return [String] the symbol of the ability
+def parse_pokemon_ability(pokemon)
+  if pokemon[:ability_index].nil?
+    ability_name = pokemon[:ability].downcase.to_s
+    existing_ability = find_existing_entity(ability_name, read_existing_entities('abilities'))
+    return existing_ability.nil? ? ability_name : existing_ability['dbSymbol']
+  else
+    # TODO: Need to make the species generation first and fetch the ability from there
+    return '__undef__'
+  end
+end
+
+# Determine the item held by a Pokémon
+# @param pokemon [Object] the Pokémon from Essentials
+# @return [String] the symbol of the item
+def parse_pokemon_item(pokemon)
+  item_name = pokemon[:item].downcase.to_s
+  existing_item = find_existing_entity(item_name, read_existing_entities('items'))
+  return existing_item.nil? ? item_name : existing_item['dbSymbol']
+end
+
+# Determine the ball in which a Pokémon was caught
+# @param pokemon [Object] the Pokémon from Essentials
+# @return [String] the symbol of the ball
+def parse_pokemon_ball(pokemon)
+  item_name = pokemon[:poke_ball].downcase.to_s
+  existing_item = find_existing_entity(item_name, read_existing_entities('items'))
+  return existing_item.nil? ? item_name : existing_item['dbSymbol']
+end

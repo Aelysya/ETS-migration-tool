@@ -2,33 +2,28 @@
 def prepare_folders
   FileUtils.rm_r('output') if Dir.exist?('output')
 
-  FileUtils.mkdir('output')
+  FileUtils.mkdir_p('output/audio')
 
-  FileUtils.mkdir('output/audio')
+  FileUtils.mkdir_p('output/Data/Text/Dialogs')
 
-  FileUtils.mkdir('output/graphics')
-  FileUtils.mkdir('output/graphics/characters')
-  FileUtils.mkdir('output/graphics/icons')
+  FileUtils.mkdir_p('output/graphics/characters')
+  FileUtils.mkdir_p('output/graphics/icons')
+  FileUtils.mkdir_p('output/graphics/pokedex/footprints')
+  FileUtils.mkdir_p('output/graphics/pokedex/pokeback')
+  FileUtils.mkdir_p('output/graphics/pokedex/pokebackshiny')
+  FileUtils.mkdir_p('output/graphics/pokedex/pokefront')
+  FileUtils.mkdir_p('output/graphics/pokedex/pokefrontshiny')
+  FileUtils.mkdir_p('output/graphics/pokedex/pokeicon')
 
-  FileUtils.mkdir('output/graphics/pokedex')
-  FileUtils.mkdir('output/graphics/pokedex/footprints')
-  FileUtils.mkdir('output/graphics/pokedex/pokeback')
-  FileUtils.mkdir('output/graphics/pokedex/pokebackshiny')
-  FileUtils.mkdir('output/graphics/pokedex/pokefront')
-  FileUtils.mkdir('output/graphics/pokedex/pokefrontshiny')
-  FileUtils.mkdir('output/graphics/pokedex/pokeicon')
-
-  FileUtils.mkdir('output/Data')
-  FileUtils.mkdir('output/Data/Text')
-  FileUtils.mkdir('output/Data/Text/Dialogs')
-
-  FileUtils.mkdir('output/Data/Studio')
-  FileUtils.mkdir('output/Data/Studio/abilities')
-  FileUtils.mkdir('output/Data/Studio/dex')
-  FileUtils.mkdir('output/Data/Studio/items')
-  FileUtils.mkdir('output/Data/Studio/moves')
-  FileUtils.mkdir('output/Data/Studio/pokemon')
-  FileUtils.mkdir('output/Data/Studio/types')
+  FileUtils.mkdir_p('output/Data/Studio/abilities')
+  FileUtils.mkdir_p('output/Data/Studio/dex')
+  FileUtils.mkdir_p('output/Data/Studio/items')
+  FileUtils.mkdir_p('output/Data/Studio/moves')
+  FileUtils.mkdir_p('output/Data/Studio/pokemon')
+  FileUtils.mkdir_p('output/Data/Studio/types')
+  FileUtils.mkdir_p('output/Data/Studio/trainers')
+  FileUtils.mkdir_p('output/Data/Studio/zones')
+  FileUtils.mkdir_p('output/Data/Studio/groups')
 end
 
 # Check if an entity contains a specific flag

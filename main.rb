@@ -29,4 +29,6 @@ prepare_folders
 # migrate_types
 # migrate_moves
 # migrate_dexes
-migrate_items
+# migrate_items
+# migrate_pokemon
+migrate_trainers

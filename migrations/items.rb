@@ -38,7 +38,7 @@ def migrate_items
         existing_move = find_existing_entity(move_name, existing_moves)
         move_exists = !existing_move.nil?
         json['move'] = move_exists ? existing_move['dbSymbol'] : move_name
-        json['isHm'] = move_exists ? existing_move['isHm'] : false
+        json['isHm'] = item_exists ? existing_item['isHm'] : false
       end
 
       if %w[StatusHealItem AllPPHealItem PPHealItem StatusRateHealItem RateHealItem StatusConstantHealItem
