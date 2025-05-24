@@ -24,11 +24,28 @@ Dir.glob('migrations/*.rb').sort.each do |file|
   require_relative file
 end
 
+# Prepare existing entities lists to avoid doing it multiple times
+$existing_items = read_existing_entities('items')
+$existing_moves = read_existing_entities('moves')
+$existing_species = read_existing_entities('pokemon')
+$existing_types = read_existing_entities('types')
+$existing_abilities = read_existing_entities('abilities')
+$existing_dexes = read_existing_entities('dex')
+
 prepare_folders
+# puts 'Migrating Abilities...'
 # migrate_abilities
+# puts 'Migrating Types...'
 # migrate_types
+# puts 'Migrating Moves...'
 # migrate_moves
+# puts 'Migrating Pokédexes...'
 # migrate_dexes
+# puts 'Migrating Items...'
 # migrate_items
+# puts 'Migrating Pokémon...'
 # migrate_pokemon
-migrate_trainers
+# puts 'Migrating Trainers...'
+# migrate_trainers
+puts 'Migrating Zones...'
+migrate_zones

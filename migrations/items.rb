@@ -2,12 +2,11 @@
 def migrate_items
   File.open(File.join($essentials_path, 'Data/items.dat'), 'rb') do |f|
     data = Marshal.load(f)
-    existing_items = read_existing_entities('items')
 
     i = 0
     data.each_value do |item|
       item_name = item.id.downcase.to_s
-      existing_item = find_existing_entity(item_name, existing_items)
+      existing_item = find_existing_entity(item_name, $existing_items)
       item_exists = !existing_item.nil?
       db_symbol = item_exists ? existing_item['dbSymbol'] : item_name
       klass = parse_klass(item, existing_item)
@@ -33,9 +32,8 @@ def migrate_items
       json['spriteFilename'] = item_exists ? existing_item['spriteFilename'] : 'ball_1' if klass == 'BallItem'
 
       if klass == 'TechItem'
-        existing_moves = read_existing_entities('moves')
         move_name = item.move.downcase.to_s
-        existing_move = find_existing_entity(move_name, existing_moves)
+        existing_move = find_existing_entity(move_name, $existing_moves)
         move_exists = !existing_move.nil?
         json['move'] = move_exists ? existing_move['dbSymbol'] : move_name
         json['isHm'] = item_exists ? existing_item['isHm'] : false

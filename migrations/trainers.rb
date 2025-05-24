@@ -61,13 +61,12 @@ end
 # @param trainer [Object] the trainer from Essentials
 # @return [Array] the bag of the trainer
 def build_bag_entries(trainer)
-  existing_items = read_existing_entities('items')
   used_items = []
   bag_entries = []
 
   trainer.items.each do |item|
     item_name = item.downcase.to_s
-    existing_item = find_existing_entity(item_name, existing_items)
+    existing_item = find_existing_entity(item_name, $existing_items)
     item_exists = !existing_item.nil?
     db_symbol = item_exists ? existing_item['dbSymbol'] : item_name
     next if used_items.include?(item_name)
@@ -86,12 +85,12 @@ end
 # @param trainer [Object] the trainer from Essentials
 # @return [Array] the party of the trainer
 def build_party(trainer)
-  existing_species = read_existing_entities('pokemon')
   party = []
 
   trainer.pokemon.each do |pokemon|
     pokemon_name = pokemon[:species].downcase.to_s
-    existing_pokemon = find_existing_entity(pokemon_name, existing_species)
+    pokemon_name.chop! if %w[nidoranfe nidoranma].include?(pokemon_name) # Nidoran species are named differently in Essentials
+    existing_pokemon = find_existing_entity(pokemon_name, $existing_species)
     pokemon_exists = !existing_pokemon.nil?
     db_symbol = pokemon_exists ? existing_pokemon['dbSymbol'] : pokemon_name
 
@@ -192,11 +191,10 @@ end
 def build_pokemon_moveset(pokemon)
   return %w[__undef__ __undef__ __undef__ __undef__] if pokemon[:moves].nil?
 
-  existing_moves = read_existing_entities('moves')
   moveset = []
 
   pokemon[:moves].each do |move|
-    existing_move = find_existing_entity(move.downcase.to_s, existing_moves)
+    existing_move = find_existing_entity(move.downcase.to_s, $existing_moves)
     db_symbol = existing_move.nil? ? move.downcase.to_s : existing_move['dbSymbol']
     moveset << db_symbol
   end
@@ -211,11 +209,17 @@ end
 def parse_pokemon_ability(pokemon)
   if pokemon[:ability_index].nil?
     ability_name = pokemon[:ability].downcase.to_s
-    existing_ability = find_existing_entity(ability_name, read_existing_entities('abilities'))
+    existing_ability = find_existing_entity(ability_name, $existing_abilities)
     return existing_ability.nil? ? ability_name : existing_ability['dbSymbol']
   else
-    # TODO: Need to make the species generation first and fetch the ability from there
-    return '__undef__'
+    pokemon_name = pokemon[:species].downcase.to_s
+    pokemon_name.chop! if %w[nidoranfe nidoranma].include?(pokemon_name) # Nidoran species are named differently in Essentials
+    existing_pokemon = find_existing_entity(pokemon_name, $existing_species)
+    db_symbol = existing_pokemon.nil? ? pokemon_name : existing_pokemon['dbSymbol']
+
+    generated_pokemon = JSON.parse(File.read(File.join('output/Data/Studio/pokemon', "#{db_symbol}.json")))
+    form = pokemon[:form].nil? ? 0 : pokemon[:form]
+    return generated_pokemon['forms'][form]['abilities'][pokemon[:ability_index]]
   end
 end
 
@@ -224,7 +228,7 @@ end
 # @return [String] the symbol of the item
 def parse_pokemon_item(pokemon)
   item_name = pokemon[:item].downcase.to_s
-  existing_item = find_existing_entity(item_name, read_existing_entities('items'))
+  existing_item = find_existing_entity(item_name, $existing_items)
   return existing_item.nil? ? item_name : existing_item['dbSymbol']
 end
 
@@ -233,6 +237,6 @@ end
 # @return [String] the symbol of the ball
 def parse_pokemon_ball(pokemon)
   item_name = pokemon[:poke_ball].downcase.to_s
-  existing_item = find_existing_entity(item_name, read_existing_entities('items'))
+  existing_item = find_existing_entity(item_name, $existing_items)
   return existing_item.nil? ? item_name : existing_item['dbSymbol']
 end

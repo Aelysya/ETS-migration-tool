@@ -10,7 +10,6 @@ end
 def migrate_national_dex
   File.open(File.join($essentials_path, 'Data/species.dat'), 'rb') do |f|
     data = Marshal.load(f)
-    existing_species = read_existing_entities('pokemon')
     creatures = []
 
     data.each_value do |pokemon|
@@ -18,7 +17,7 @@ def migrate_national_dex
       pokemon_name.chop! if %w[nidoranfe nidoranma].include?(pokemon_name) # Nidoran species are named differently in Essentials
       next if pokemon.form != 0
 
-      existing_pokemon = find_existing_entity(pokemon_name, existing_species)
+      existing_pokemon = find_existing_entity(pokemon_name, $existing_species)
       db_symbol = existing_pokemon.nil? ? pokemon_name : existing_pokemon['dbSymbol']
 
       creatures << {
@@ -46,7 +45,6 @@ end
 def migrate_regional_dexes
   File.open(File.join($essentials_path, 'Data/regional_dexes.dat'), 'rb') do |f|
     data = Marshal.load(f)
-    existing_species = read_existing_entities('pokemon')
 
     data.each_with_index do |dex, i|
       dex_name = find_dex_name(i)
@@ -55,7 +53,7 @@ def migrate_regional_dexes
       dex.each do |pokemon|
         pokemon_name = pokemon.downcase.to_s
         pokemon_name.chop! if %w[nidoranfe nidoranma].include?(pokemon_name) # Nidoran species are named differently in Essentials
-        existing_pokemon = find_existing_entity(pokemon_name, existing_species)
+        existing_pokemon = find_existing_entity(pokemon_name, $existing_species)
         db_symbol = existing_pokemon.nil? ? pokemon_name : existing_pokemon['dbSymbol']
 
         creatures << {

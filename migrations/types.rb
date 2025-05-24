@@ -3,14 +3,13 @@ def migrate_types
   # File.open("Data/messages_core.dat", "rb") do |f|
   File.open(File.join($essentials_path, 'Data/types.dat'), 'rb') do |f|
     data = Marshal.load(f)
-    existing_types = read_existing_entities('types')
 
     i = 0
     data.each_value do |type|
       type_name = type.id.downcase.to_s
       next if type_name == 'qmarks'
 
-      existing_type = find_existing_entity(type_name, existing_types)
+      existing_type = find_existing_entity(type_name, $existing_types)
       type_exists = !existing_type.nil?
       db_symbol = type_exists ? existing_type['dbSymbol'] : type_name
 

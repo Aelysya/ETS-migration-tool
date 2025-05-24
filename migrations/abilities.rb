@@ -2,7 +2,6 @@
 def migrate_abilities
   File.open(File.join($essentials_path, 'Data/abilities.dat'), 'rb') do |f|
     data = Marshal.load(f)
-    existing_abilities = read_existing_entities('abilities')
 
     i = 0
     data.each_value do |ability|
@@ -14,7 +13,7 @@ def migrate_abilities
       if ability_name == 'asonechillingneigh'
         db_symbol = 'as_one'
       else
-        existing_ability = find_existing_entity(ability_name, existing_abilities)
+        existing_ability = find_existing_entity(ability_name, $existing_abilities)
         db_symbol = existing_ability.nil? ? ability_name : existing_ability['dbSymbol']
       end
 

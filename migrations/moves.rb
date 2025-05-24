@@ -2,12 +2,11 @@
 def migrate_moves
   File.open(File.join($essentials_path, 'Data/moves.dat'), 'rb') do |f|
     data = Marshal.load(f)
-    existing_moves = read_existing_entities('moves')
 
     i = 0
     data.each_value do |move|
       move_name = move.id.downcase.to_s
-      existing_move = find_existing_entity(move_name, existing_moves)
+      existing_move = find_existing_entity(move_name, $existing_moves)
       move_exists = !existing_move.nil?
       db_symbol = move_exists ? existing_move['dbSymbol'] : move_name
       be_method = parse_be_method(move.function_code)
