@@ -81,7 +81,6 @@ end
 def find_wild_groups(zone)
   File.open(File.join($essentials_path, 'Data/encounters.dat'), 'rb') do |f|
     data = Marshal.load(f)
-    puts data.inspect
     groups = []
 
     i = 0
