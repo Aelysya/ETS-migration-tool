@@ -47,5 +47,7 @@ prepare_folders
 # migrate_pokemon
 # puts 'Migrating Trainers...'
 # migrate_trainers
-puts 'Migrating Zones...'
+# puts 'Migrating Zones...'
 migrate_zones
+puts 'Migrating Groups...'
+migrate_groups
