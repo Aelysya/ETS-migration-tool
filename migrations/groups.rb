@@ -2,7 +2,6 @@
 def migrate_groups
   File.open(File.join($essentials_path, 'Data/encounters.dat'), 'rb') do |f|
     data = Marshal.load(f)
-    puts data.inspect
 
     i = 0
     data.each_value do |encounter_group|
