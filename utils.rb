@@ -2,12 +2,14 @@
 def prepare_folders
   FileUtils.rm_r('output') if Dir.exist?('output')
 
-  FileUtils.mkdir_p('output/audio')
+  FileUtils.mkdir_p('output/audio/bgm')
+  FileUtils.mkdir_p('output/audio/se/cries')
 
   FileUtils.mkdir_p('output/Data/Text/Dialogs')
 
   FileUtils.mkdir_p('output/graphics/characters')
   FileUtils.mkdir_p('output/graphics/icons')
+  FileUtils.mkdir_p('output/graphics/battlers')
   FileUtils.mkdir_p('output/graphics/pokedex/footprints')
   FileUtils.mkdir_p('output/graphics/pokedex/pokeback')
   FileUtils.mkdir_p('output/graphics/pokedex/pokebackshiny')

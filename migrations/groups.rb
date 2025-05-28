@@ -61,6 +61,9 @@ def parse_condition(type)
   ]
 end
 
+# Build the encounters of a group
+# @param encounters [Array] the encounters from Essentials
+# @return [Array] the encounters of the group
 def build_encounters_element(encounters)
   encounters_element = []
   encounters.each do |pokemon|

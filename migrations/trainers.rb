@@ -9,6 +9,7 @@ def migrate_trainers
       trainer_type = find_trainer_type(trainer)
       next i += 1 if trainer_type.nil?
 
+      copy_trainer_resources(trainer_type)
       db_symbol = "trainer_#{i}"
 
       json = {
@@ -239,4 +240,21 @@ def parse_pokemon_ball(pokemon)
   item_name = pokemon[:poke_ball].downcase.to_s
   existing_item = find_existing_entity(item_name, $existing_items)
   return existing_item.nil? ? item_name : existing_item['dbSymbol']
+end
+
+# Copy the Essentials resources of this trainer
+# @param trainer_type [Object] the trainer type from Essentiasl containing information to find the related graphics
+def copy_trainer_resources(trainer_type)
+  graphics_source = File.join($essentials_path, 'Graphics')
+  trainer_sprite = File.join(graphics_source, "Trainers/#{trainer_type.id}.png")
+  FileUtils.cp(trainer_sprite, File.join('output/graphics/battlers')) if File.exist?(trainer_sprite)
+
+  character_sprite = File.join(graphics_source, "Characters/trainer_#{trainer_type.id}.png")
+  FileUtils.cp(character_sprite, File.join('output/graphics/characters')) if File.exist?(character_sprite)
+
+  audio_source = File.join($essentials_path, 'Audio/BGM')
+  audio_dest = File.join('output/audio/bgm')
+  Dir.glob(File.join(audio_source, "#{trainer_type.intro_BGM}.*")) { |file| FileUtils.cp(file, audio_dest) } unless trainer_type.intro_BGM.nil?
+  Dir.glob(File.join(audio_source, "#{trainer_type.battle_BGM}.*")) { |file| FileUtils.cp(file, audio_dest) } unless trainer_type.battle_BGM.nil?
+  Dir.glob(File.join(audio_source, "#{trainer_type.victory_BGM}.*")) { |file| FileUtils.cp(file, audio_dest) } unless trainer_type.victory_BGM.nil?
 end

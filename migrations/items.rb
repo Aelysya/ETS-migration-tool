@@ -47,6 +47,8 @@ def migrate_items
         end
       end
 
+      copy_item_resources(item, i, json['move'])
+
       i += 1
       save_json("Data/Studio/items/#{db_symbol}.json", json)
     end
@@ -94,4 +96,31 @@ def parse_fling_power(item)
   return 0 unless item.flags.any? { |f| f =~ /Fling/ }
 
   item.flags.each { |flag| return $1.to_i if flag =~ /Fling_(\d+)/ }
+end
+
+# Copy the Essentials resources of this item
+# @param item [Object] the item from Essentiasl containing information to find the related graphics
+# @param id [Int] the item's ID
+# @param move [String | nil] the move taught by this item
+def copy_item_resources(item, id, move = nil)
+  graphics_source = File.join($essentials_path, 'Graphics/Items')
+  if move.nil?
+    Dir.glob(File.join(graphics_source, "#{item.id}*")) do |file|
+      ext = File.extname(file)
+      dest = File.join('output/graphics/icons', "#{id}#{ext}")
+      FileUtils.cp(file, dest)
+    end
+  else
+    existing_move = find_existing_entity(move, $existing_moves)
+    db_symbol = existing_move.nil? ? move : existing_move['dbSymbol']
+
+    generated_move = JSON.parse(File.read(File.join('output/Data/Studio/moves', "#{db_symbol}.json")))
+    type = generated_move['type'].upcase
+
+    Dir.glob(File.join(graphics_source, "machine_#{type}*")) do |file|
+      ext = File.extname(file)
+      dest = File.join('output/graphics/icons', "#{id}#{ext}")
+      FileUtils.cp(file, dest)
+    end
+  end
 end

@@ -64,6 +64,8 @@ def build_forms(pokemon, number, data)
       mega_form_counter += 1
     end
 
+    has_female = copy_pokemon_resources(p, form_number, number)
+
     first_egg_group = parse_egg_group(p.egg_groups[0])
     second_egg_group = p.egg_groups[1].nil? ? first_egg_group : parse_egg_group(p.egg_groups[1])
 
@@ -106,7 +108,7 @@ def build_forms(pokemon, number, data)
       itemHeld: parse_items(p),
       abilities: parse_abilities(p),
       frontOffsetY: 0,
-      resources: build_resources_element(number, form_number, true),
+      resources: build_resources_element(number, form_number, has_female || p.gender_ratio == :AlwaysFemale),
       moveSet: build_moveset_element(p),
       formTextId: {
         name: $name_counter,
@@ -483,4 +485,88 @@ def parse_evolution_conditions(method, parameter)
   end
 
   return conditions
+end
+
+# Copy the Essentials resources of this Pokémon
+# @param pokemon [Object] the Pokémon from Essentiasl containing information to find the related graphics
+# @param form [Int] the form of the Pokémon
+# @param number [Int] the national number of the Pokémon
+# @return [Boolean] if the Pokémon has female sprites
+def copy_pokemon_resources(pokemon, form, number)
+  has_female = false
+  source_file_name = pokemon.id.to_s
+
+  main_part = number.to_s.rjust(4, '0')
+  form_part = form == 0 ? '' : "_#{form.to_s.rjust(2, '0')}"
+  basic_resource = "#{main_part}#{form_part}"
+  female_resource = "#{main_part}f#{form_part}"
+  shiny_resource = "#{main_part}s#{form_part}"
+  shiny_f_resource = "#{main_part}sf#{form_part}"
+
+  graphics_source = File.join($essentials_path, 'Graphics/Pokemon')
+  Dir.glob(File.join(graphics_source, "Back/#{source_file_name}*")) do |file|
+    ext = File.extname(file)
+    has_female = true if file.include?('_female')
+    dest = File.join('output/graphics/pokedex/pokeback', "#{file.include?('_female') ? female_resource : basic_resource}#{ext}")
+    FileUtils.cp(file, dest)
+  end
+
+  Dir.glob(File.join(graphics_source, "Back shiny/#{source_file_name}*")) do |file|
+    ext = File.extname(file)
+    has_female = true if file.include?('_female')
+    dest = File.join('output/graphics/pokedex/pokebackshiny', "#{file.include?('_female') ? shiny_f_resource : shiny_resource}#{ext}")
+    FileUtils.cp(file, dest)
+  end
+
+  Dir.glob(File.join(graphics_source, "Front/#{source_file_name}*")) do |file|
+    ext = File.extname(file)
+    has_female = true if file.include?('_female')
+    dest = File.join('output/graphics/pokedex/pokefront', "#{file.include?('_female') ? female_resource : basic_resource}#{ext}")
+    FileUtils.cp(file, dest)
+  end
+
+  Dir.glob(File.join(graphics_source, "Front shiny/#{source_file_name}*")) do |file|
+    ext = File.extname(file)
+    has_female = true if file.include?('_female')
+    dest = File.join('output/graphics/pokedex/pokefrontshiny', "#{file.include?('_female') ? shiny_f_resource : shiny_resource}#{ext}")
+    FileUtils.cp(file, dest)
+  end
+
+  Dir.glob(File.join(graphics_source, "Icons/#{source_file_name}*")) do |file|
+    ext = File.extname(file)
+    has_female = true if file.include?('_female')
+    dest = File.join('output/graphics/pokedex/pokeicon', "#{file.include?('_female') ? female_resource : basic_resource}#{ext}")
+    FileUtils.cp(file, dest)
+  end
+
+  Dir.glob(File.join(graphics_source, "Icons shiny/#{source_file_name}*")) do |file|
+    ext = File.extname(file)
+    has_female = true if file.include?('_female')
+    dest = File.join('output/graphics/pokedex/pokeicon', "#{file.include?('_female') ? shiny_f_resource : shiny_resource}#{ext}")
+    FileUtils.cp(file, dest)
+  end
+
+  Dir.glob(File.join(graphics_source, "Footprints/#{source_file_name}*")) do |file|
+    ext = File.extname(file)
+    dest = File.join('output/graphics/pokedex/footprints', "#{basic_resource}#{ext}")
+    FileUtils.cp(file, dest)
+  end
+
+  Dir.glob(File.join($essentials_path, "Graphics/Characters/#{source_file_name}*")) do |file|
+    ext = File.extname(file)
+    if file.include?('_s') || file.include?('s_') || file.include?('shiny')
+      dest = File.join('output/graphics/characters', "#{shiny_resource}#{ext}")
+    else
+      dest = File.join('output/graphics/characters', "#{basic_resource}#{ext}")
+    end
+    FileUtils.cp(file, dest)
+  end
+
+  Dir.glob(File.join($essentials_path, "Audio/SE/Cries/#{source_file_name}*")) do |file|
+    ext = File.extname(file)
+    dest = File.join('output/audio/se/cries', "#{basic_resource}#{ext}")
+    FileUtils.cp(file, dest)
+  end
+
+  return has_female
 end
