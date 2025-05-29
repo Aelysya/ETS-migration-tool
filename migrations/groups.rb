@@ -21,6 +21,7 @@ def migrate_groups
         }
 
         save_json("Data/Studio/groups/group_#{i}.json", json)
+        generate_dummy_csv("Group #{i}", 100_061)
         i += 1
       end
     end

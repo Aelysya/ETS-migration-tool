@@ -119,6 +119,14 @@ def build_forms(pokemon, number, data)
     i += 1
     $name_counter += 1
     $description_counter += 1 unless form_number == 0
+    if form_number == 0
+      translate_text(p.real_name, 'core', 1, 100_000, offset: true)
+      translate_text(p.real_category, 'core', 2, 100_001, offset: true)
+      translate_text(p.real_pokedex_entry, 'core', 3, 100_002, offset: true)
+    else
+      translate_text(p.real_form_name, 'core', 4, 100_067)
+      translate_text(p.real_pokedex_entry, 'core', 3, 100_068, offset: true)
+    end
   end
   return forms
 end

@@ -26,6 +26,8 @@ def migrate_zones
       }
 
       save_json("Data/Studio/zones/zone_#{i}.json", json)
+      generate_dummy_csv("Zone #{i} description", 100_064)
+      translate_text(zone.real_name, 'game', 21, 100_010)
       i += 1
     end
   end

@@ -24,6 +24,7 @@ def migrate_types
 
       i += 1
       save_json("Data/Studio/types/#{db_symbol}.json", json)
+      translate_text(type.real_name, 'core', 12, 100_003)
     end
   end
 end

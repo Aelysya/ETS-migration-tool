@@ -77,3 +77,45 @@ def save_json(file_name, data)
 
   File.write(File.join('output', file_name), json)
 end
+
+CSV_HEADER = %w[en fr it de es ko kana]
+# Find all translations of a text and write them in the Studio CSV
+# @param text [String] the text to translate
+# @param file [String] the file in which the text translations are contained, 'core' or 'game'
+# @param section [Int] the section of the file in which the text translations are contained
+# @param csv_number [Int] the CSV name
+def translate_text(text, file_type, section, csv_number, offset: false)
+  line = ['', '', '', '', '', '']
+  Dir.glob(File.join($essentials_path, "Data/messages*#{file_type}.dat")) do |file|
+    File.open(file, 'rb') do |dat|
+      data = Marshal.load(dat)
+      line[0] = data[section][text] if file.downcase.include?("messages_#{file_type}.dat") # English has no language code
+      line[1] = data[section][text] if file.downcase.include?('_fr')
+      line[2] = data[section][text] if file.downcase.include?('_it')
+      line[3] = data[section][text] if file.downcase.include?('_de') || file.downcase.include?('_ge')
+      line[4] = data[section][text] if file.downcase.include?('_es')
+      line[5] = data[section][text] if file.downcase.include?('_ko')
+      line[6] = data[section][text] if file.downcase.include?('_ja') || file.downcase.include?('_jp')
+    end
+  end
+
+  CSV.open(File.join("output/Data/Text/Dialogs/#{csv_number}.csv"), 'a') do |csv|
+    if File.zero?(csv) || !File.exist?(csv)
+      csv << CSV_HEADER
+      csv << %w[National National National National National National National] if csv_number == 100_063
+      csv << %w[- - - - - - -] if offset
+    end
+    line.map! { |t| t == '' ? line[0] : t }
+    csv << line
+  end
+end
+
+# Generate a dummy CSV
+# @param text [String] the dummy text
+# @param csv_number [Int] the CSV name
+def generate_dummy_csv(text, csv_number)
+  CSV.open(File.join("output/Data/Text/Dialogs/#{csv_number}.csv"), 'a') do |csv|
+    csv << CSV_HEADER if File.zero?(csv) || !File.exist?(csv)
+    csv << [text, text, text, text, text, text, text]
+  end
+end

@@ -51,6 +51,9 @@ def migrate_items
 
       i += 1
       save_json("Data/Studio/items/#{db_symbol}.json", json)
+      translate_text(item.real_name, 'core', 7, 100_012)
+      translate_text(item.real_name_plural, 'core', 8, 900_1)
+      translate_text(item.real_description, 'core', 9, 100_013)
     end
   end
 end

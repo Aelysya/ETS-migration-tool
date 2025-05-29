@@ -40,6 +40,9 @@ def migrate_trainers
 
       i += 1
       save_json("Data/Studio/trainers/#{db_symbol}.json", json)
+      translate_text(trainer_type.real_name, 'core', 13, 100_029)
+      translate_text(trainer.real_name, 'game', 14, 100_062)
+      translate_text(trainer.real_lose_text, 'game', 23, 100_048)
     end
   end
 end

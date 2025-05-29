@@ -1,4 +1,5 @@
 require 'json'
+require 'csv'
 require 'fileutils'
 require_relative 'utils'
 
@@ -37,22 +38,22 @@ start_time = Time.now
 prepare_folders
 puts 'Migrating Abilities...'
 migrate_abilities
-puts 'Migrating Types...'
-migrate_types
-puts 'Migrating Moves...'
-migrate_moves
-puts 'Migrating Pokédexes...'
-migrate_dexes
-puts 'Migrating Items...'
-migrate_items
-puts 'Migrating Pokémon...'
-migrate_pokemon
-puts 'Migrating Trainers...'
-migrate_trainers
-puts 'Migrating Zones...'
-migrate_zones
-puts 'Migrating Groups...'
-migrate_groups
+# puts 'Migrating Types...'
+# migrate_types
+# puts 'Migrating Moves...'
+# migrate_moves
+# puts 'Migrating Pokédexes...'
+# migrate_dexes
+# puts 'Migrating Items...'
+# migrate_items
+# puts 'Migrating Pokémon...'
+# migrate_pokemon
+# puts 'Migrating Trainers...'
+# migrate_trainers
+# puts 'Migrating Zones...'
+# migrate_zones
+# puts 'Migrating Groups...'
+# migrate_groups
 
 end_time = Time.now
 puts "Duration of generation : #{end_time - start_time} seconds"

@@ -57,6 +57,8 @@ def migrate_moves
 
       i += 1
       save_json("Data/Studio/moves/#{db_symbol}.json", json)
+      translate_text(move.real_name, 'core', 5, 100_006)
+      translate_text(move.real_description, 'core', 6, 100_007)
     end
   end
 end
