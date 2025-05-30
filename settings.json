@@ -1,4 +1,5 @@
 {
   "essentials_path": "C:/path/to/your/essentials/project/root/folder",
-  "datapacks_path": "C:/path/to/the/datapacks/directory"
+  "datapacks_path": "C:/path/to/the/datapacks/directory",
+  "resize_images": false
 }

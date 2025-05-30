@@ -6,8 +6,8 @@ $description_counter = 0
 def migrate_pokemon
   File.open(File.join($essentials_path, 'Data/species.dat'), 'rb') do |f|
     data = Marshal.load(f)
-    processed_species = []
 
+    processed_species = []
     i = 1
     data.each_value do |pokemon|
       pokemon_name = pokemon.species.downcase.to_s
@@ -26,7 +26,6 @@ def migrate_pokemon
         forms: build_forms(pokemon, i, data)
       }
 
-      i += 1
       save_json("Data/Studio/pokemon/#{db_symbol}.json", json)
     end
   end
@@ -41,12 +40,13 @@ def build_forms(pokemon, number, data)
   forms = []
 
   mega_form_counter = 30
+  form_counter = 0
   i = 0
   data.each_value do |p|
     next unless p.species == pokemon.species
     next if p.species.downcase.to_s == 'alcremie' && p.form != 0
 
-    form_number = p.mega_stone.nil? && p.mega_move.nil? ? p.form : mega_form_counter
+    form_number = p.mega_stone.nil? && p.mega_move.nil? ? form_counter : mega_form_counter
     if form_number >= 30 && !p.mega_stone.nil?
       item_name = p.mega_stone.downcase.to_s
       existing_item = find_existing_entity(item_name, $existing_items)
@@ -54,12 +54,7 @@ def build_forms(pokemon, number, data)
 
       forms[p.unmega_form][:evolutions] << {
         form: mega_form_counter,
-        conditions: [
-          {
-            type: 'gemme',
-            value: stone_db_symbol
-          }
-        ]
+        conditions: [{ type: 'gemme', value: stone_db_symbol }]
       }
       mega_form_counter += 1
     end
@@ -70,7 +65,7 @@ def build_forms(pokemon, number, data)
     second_egg_group = p.egg_groups[1].nil? ? first_egg_group : parse_egg_group(p.egg_groups[1])
 
     baby_db_symbol = find_baby(p, data)
-    baby_name_with_form = "#{baby_db_symbol.upcase.gsub(/_/, '')}_#{p.form}"
+    baby_name_with_form = "#{baby_db_symbol.upcase.gsub(/_/, '')}_#{form_counter}"
 
     evolution_element = build_evolutions(p)
 
@@ -104,19 +99,22 @@ def build_forms(pokemon, number, data)
       ],
       hatchSteps: p.hatch_steps,
       babyDbSymbol: baby_db_symbol,
-      babyForm: data[baby_name_with_form.to_sym].nil? ? 0 : p.form,
+      babyForm: data[baby_name_with_form.to_sym].nil? ? 0 : form_counter,
       itemHeld: parse_items(p),
       abilities: parse_abilities(p),
       frontOffsetY: 0,
-      resources: build_resources_element(number, form_number, has_female || p.gender_ratio == :AlwaysFemale),
+      resources: build_resources_element(number, form_number, has_female || p.gender_ratio == :AlwaysFemale, p.id),
       moveSet: build_moveset_element(p),
       formTextId: {
         name: $name_counter,
         description: form_number == 0 ? 0 : $description_counter
       }
     }
-
+  rescue => e
+    $errors << "Error #{e} on #{db_symbol}"
+  ensure
     i += 1
+    form_counter += 1
     $name_counter += 1
     $description_counter += 1 unless form_number == 0
     if form_number == 0
@@ -213,7 +211,7 @@ def parse_egg_group(egg_group)
   end
 end
 
-def build_resources_element(number, form_number, has_female)
+def build_resources_element(number, form_number, has_female, pokemon_id)
   main_part = number.to_s.rjust(4, '0')
   form_part = form_number == 0 ? '' : "_#{form_number.to_s.rjust(2, '0')}"
 
@@ -221,6 +219,8 @@ def build_resources_element(number, form_number, has_female)
   female_resource = "#{main_part}f#{form_part}"
   shiny_resource = "#{main_part}s#{form_part}"
   shiny_f_resource = "#{main_part}sf#{form_part}"
+
+  cry_resource = File.exist?(File.join($essentials_path, "Audio/SE/Cries/#{pokemon_id}.ogg")) ? "#{basic_resource}.ogg" : "#{main_part}.ogg"
 
   resources = {}
   resources[:icon] = basic_resource
@@ -240,7 +240,7 @@ def build_resources_element(number, form_number, has_female)
   resources[:characterF] = female_resource if has_female
   resources[:characterShiny] = shiny_resource
   resources[:characterShinyF] = shiny_f_resource if has_female
-  resources[:cry] = form_number >= 30 ? "#{basic_resource}.ogg" : "#{main_part}.ogg"
+  resources[:cry] = cry_resource
   resources[:hasFemale] = has_female
   resources[:egg] = 'egg'
   resources[:iconEgg] = 'egg'
@@ -341,7 +341,14 @@ def build_moveset_element(pokemon)
     move_set << {
       dbSymbol: existing_move.nil? ? move_name : existing_move['dbSymbol'],
       klass: 'LevelLearnableMove',
-      level: move[0]
+      level: move[0].clamp(1, 999)
+    }
+
+    next unless move[0] == 0
+
+    move_set << {
+      dbSymbol: existing_move.nil? ? move_name : existing_move['dbSymbol'],
+      klass: 'EvolutionLearnableMove'
     }
   end
 
@@ -407,7 +414,7 @@ def build_evolutions(pokemon)
 
   # These Pokémon have a function in one of their evolutions conditions, so we fetch their evolutions from the datapack
   if %w[basculin bisharp bramblin dunsparce eevee farfetch_d gimmighoul inkay mantyke milcery
-        pancham pawmo primeape rellor tandemaus toxel tyrogue ursaring wurmple].include?(db_symbol)
+        pancham pawmo primeape rellor tandemaus toxel tyrogue ursaring wurmple qwilfish primeape stantler].include?(db_symbol)
     return existing_pokemon['forms'][pokemon.form]['evolutions']
   end
 
@@ -436,7 +443,7 @@ def parse_evolution_conditions(method, parameter)
   conditions = []
   method_s = method.downcase.to_s
 
-  conditions << { type: 'minLevel', value: parameter.to_i } if method_s.include?('level')
+  conditions << { type: 'minLevel', value: parameter.to_i } if method_s.include?('level') && !method_s.include?('usemove')
   conditions << { type: 'minLoyalty', value: 220 } if method_s.include?('happiness')
   conditions << { type: 'trade', value: true } if method_s.include?('trade')
   conditions << { type: 'maps', value: [-1] } if method_s.include?('location') || method_s.include?('region')
@@ -514,43 +521,43 @@ def copy_pokemon_resources(pokemon, form, number)
   graphics_source = File.join($essentials_path, 'Graphics/Pokemon')
   Dir.glob(File.join(graphics_source, "Back/#{source_file_name}*")) do |file|
     ext = File.extname(file)
-    has_female = true if file.include?('_female')
-    dest = File.join('output/graphics/pokedex/pokeback', "#{file.include?('_female') ? female_resource : basic_resource}#{ext}")
+    has_female = true if file.downcase.include?('_female')
+    dest = File.join('output/graphics/pokedex/pokeback', "#{file.downcase.include?('_female') ? female_resource : basic_resource}#{ext}")
     FileUtils.cp(file, dest)
   end
 
   Dir.glob(File.join(graphics_source, "Back shiny/#{source_file_name}*")) do |file|
     ext = File.extname(file)
-    has_female = true if file.include?('_female')
-    dest = File.join('output/graphics/pokedex/pokebackshiny', "#{file.include?('_female') ? shiny_f_resource : shiny_resource}#{ext}")
+    has_female = true if file.downcase.include?('_female')
+    dest = File.join('output/graphics/pokedex/pokebackshiny', "#{file.downcase.include?('_female') ? shiny_f_resource : shiny_resource}#{ext}")
     FileUtils.cp(file, dest)
   end
 
   Dir.glob(File.join(graphics_source, "Front/#{source_file_name}*")) do |file|
     ext = File.extname(file)
-    has_female = true if file.include?('_female')
-    dest = File.join('output/graphics/pokedex/pokefront', "#{file.include?('_female') ? female_resource : basic_resource}#{ext}")
+    has_female = true if file.downcase.include?('_female')
+    dest = File.join('output/graphics/pokedex/pokefront', "#{file.downcase.include?('_female') ? female_resource : basic_resource}#{ext}")
     FileUtils.cp(file, dest)
   end
 
   Dir.glob(File.join(graphics_source, "Front shiny/#{source_file_name}*")) do |file|
     ext = File.extname(file)
-    has_female = true if file.include?('_female')
-    dest = File.join('output/graphics/pokedex/pokefrontshiny', "#{file.include?('_female') ? shiny_f_resource : shiny_resource}#{ext}")
+    has_female = true if file.downcase.include?('_female')
+    dest = File.join('output/graphics/pokedex/pokefrontshiny', "#{file.downcase.include?('_female') ? shiny_f_resource : shiny_resource}#{ext}")
     FileUtils.cp(file, dest)
   end
 
   Dir.glob(File.join(graphics_source, "Icons/#{source_file_name}*")) do |file|
     ext = File.extname(file)
-    has_female = true if file.include?('_female')
-    dest = File.join('output/graphics/pokedex/pokeicon', "#{file.include?('_female') ? female_resource : basic_resource}#{ext}")
+    has_female = true if file.downcase.include?('_female')
+    dest = File.join('output/graphics/pokedex/pokeicon', "#{file.downcase.include?('_female') ? female_resource : basic_resource}#{ext}")
     FileUtils.cp(file, dest)
   end
 
   Dir.glob(File.join(graphics_source, "Icons shiny/#{source_file_name}*")) do |file|
     ext = File.extname(file)
-    has_female = true if file.include?('_female')
-    dest = File.join('output/graphics/pokedex/pokeicon', "#{file.include?('_female') ? shiny_f_resource : shiny_resource}#{ext}")
+    has_female = true if file.downcase.include?('_female')
+    dest = File.join('output/graphics/pokedex/pokeicon', "#{file.downcase.include?('_female') ? shiny_f_resource : shiny_resource}#{ext}")
     FileUtils.cp(file, dest)
   end
 

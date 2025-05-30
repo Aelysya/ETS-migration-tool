@@ -49,8 +49,11 @@ def migrate_items
 
       copy_item_resources(item, i, json['move'])
 
-      i += 1
       save_json("Data/Studio/items/#{db_symbol}.json", json)
+    rescue => e
+      $errors << "Error #{e} on #{db_symbol}"
+    ensure
+      i += 1
       translate_text(item.real_name, 'core', 7, 100_012)
       translate_text(item.real_name_plural, 'core', 8, 900_1)
       translate_text(item.real_description, 'core', 9, 100_013)

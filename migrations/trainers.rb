@@ -38,8 +38,11 @@ def migrate_trainers
         additionalDialogs: []
       }
 
-      i += 1
       save_json("Data/Studio/trainers/#{db_symbol}.json", json)
+    rescue => e
+      $errors << "Error #{e} on #{db_symbol}"
+    ensure
+      i += 1
       translate_text(trainer_type.real_name, 'core', 13, 100_029)
       translate_text(trainer.real_name, 'game', 14, 100_062)
       translate_text(trainer.real_lose_text, 'game', 23, 100_048)
@@ -78,8 +81,8 @@ def build_bag_entries(trainer)
     used_items << item_name
 
     bag_entries << {
-      id: db_symbol,
-      quantity: trainer.items.count(item)
+      dbSymbol: db_symbol,
+      amount: trainer.items.count(item)
     }
   end
   return bag_entries

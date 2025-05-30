@@ -89,13 +89,16 @@ def translate_text(text, file_type, section, csv_number, offset: false)
   Dir.glob(File.join($essentials_path, "Data/messages*#{file_type}.dat")) do |file|
     File.open(file, 'rb') do |dat|
       data = Marshal.load(dat)
-      line[0] = data[section][text] if file.downcase.include?("messages_#{file_type}.dat") # English has no language code
-      line[1] = data[section][text] if file.downcase.include?('_fr')
-      line[2] = data[section][text] if file.downcase.include?('_it')
-      line[3] = data[section][text] if file.downcase.include?('_de') || file.downcase.include?('_ge')
-      line[4] = data[section][text] if file.downcase.include?('_es')
-      line[5] = data[section][text] if file.downcase.include?('_ko')
-      line[6] = data[section][text] if file.downcase.include?('_ja') || file.downcase.include?('_jp')
+      if file.downcase.include?("messages_#{file_type}.dat") # English has no language code
+        line[0] = data[section][text].nil? ? text : data[section][text]
+      else
+        line[1] = data[section][text] if file.downcase.include?('_fr')
+        line[2] = data[section][text] if file.downcase.include?('_it')
+        line[3] = data[section][text] if file.downcase.include?('_de') || file.downcase.include?('_ge')
+        line[4] = data[section][text] if file.downcase.include?('_es')
+        line[5] = data[section][text] if file.downcase.include?('_ko')
+        line[6] = data[section][text] if file.downcase.include?('_ja') || file.downcase.include?('_jp')
+      end
     end
   end
 

@@ -4,9 +4,12 @@ require 'fileutils'
 require_relative 'utils'
 
 $settings = JSON.parse(File.read('settings.local.json'))
+$resize_sprites = $settings['resize_sprites']
 $essentials_path = $settings['essentials_path']
 $essentials_script_path = File.join($essentials_path, 'Data/Scripts')
 $datapacks_path = File.join($settings['datapacks_path'], 'Gen 9/scarlet-violet')
+
+$errors = []
 
 require File.join($essentials_script_path, '010_Data/001_GameData')
 require File.join($essentials_script_path, '001_Technical/003_Intl_Messages')
@@ -36,12 +39,12 @@ $existing_dexes = read_existing_entities('dex')
 start_time = Time.now
 
 prepare_folders
-puts 'Migrating Abilities...'
-migrate_abilities
+# puts 'Migrating Abilities...'
+# migrate_abilities
 # puts 'Migrating Types...'
 # migrate_types
-# puts 'Migrating Moves...'
-# migrate_moves
+puts 'Migrating Moves...'
+migrate_moves
 # puts 'Migrating Pokédexes...'
 # migrate_dexes
 # puts 'Migrating Items...'
@@ -57,3 +60,5 @@ migrate_abilities
 
 end_time = Time.now
 puts "Duration of generation : #{end_time - start_time} seconds"
+
+puts $errors.inspect

@@ -21,8 +21,11 @@ def migrate_groups
         }
 
         save_json("Data/Studio/groups/group_#{i}.json", json)
-        generate_dummy_csv("Group #{i}", 100_061)
+      rescue => e
+        $errors << "Error #{e} on group_#{i}"
+      ensure
         i += 1
+        generate_dummy_csv("Group #{i}", 100_061)
       end
     end
   end
@@ -46,10 +49,10 @@ end
 def parse_condition(type)
   switch_value = nil
 
-  return switch_value = 11 if type.include?('Day') || type.include?('Afternoon')
-  return switch_value = 12 if type.include?('Night')
-  return switch_value = 13 if type.include?('Morning')
-  return switch_value = 14 if type.include?('Evening')
+  switch_value = 11 if type.include?('Day') || type.include?('Afternoon')
+  switch_value = 12 if type.include?('Night')
+  switch_value = 13 if type.include?('Morning')
+  switch_value = 14 if type.include?('Evening')
 
   return [] if switch_value.nil?
 

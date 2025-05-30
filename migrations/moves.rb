@@ -52,11 +52,14 @@ def migrate_moves
         battleEngineAimedTarget: parse_move_target_mode(move.target.to_s),
         battleStageMod: parse_move_stats(move.function_code),
         moveStatus: parse_move_statuses(move.function_code),
-        effectChance: move.effect_chance.clamp(0, 100)
+        effectChance: move.effect_chance > 100 ? (move.effect_chance / 10).floor : move.effect_chance.clamp(0, 100)
       }
 
-      i += 1
       save_json("Data/Studio/moves/#{db_symbol}.json", json)
+    rescue => e
+      $errors << "Error #{e} on #{db_symbol}"
+    ensure
+      i += 1
       translate_text(move.real_name, 'core', 5, 100_006)
       translate_text(move.real_description, 'core', 6, 100_007)
     end
