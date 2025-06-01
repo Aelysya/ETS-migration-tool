@@ -8,6 +8,8 @@ $resize_sprites = $settings['resize_sprites']
 $essentials_path = $settings['essentials_path']
 $essentials_script_path = File.join($essentials_path, 'Data/Scripts')
 $datapacks_path = File.join($settings['datapacks_path'], 'Gen 9/scarlet-violet')
+$core_text_files = [[], [], [], [], [], [], []]
+$game_text_files = [[], [], [], [], [], [], []]
 
 $errors = []
 
@@ -39,26 +41,26 @@ $existing_dexes = read_existing_entities('dex')
 start_time = Time.now
 
 prepare_folders
-# puts 'Migrating Abilities...'
-# migrate_abilities
-# puts 'Migrating Types...'
-# migrate_types
+prepare_text_files
+puts 'Migrating Abilities...'
+migrate_abilities
+puts 'Migrating Types...'
+migrate_types
 puts 'Migrating Moves...'
 migrate_moves
-# puts 'Migrating Pokédexes...'
-# migrate_dexes
-# puts 'Migrating Items...'
-# migrate_items
+puts 'Migrating Pokédexes...'
+migrate_dexes
+puts 'Migrating Items...'
+migrate_items
 # puts 'Migrating Pokémon...'
 # migrate_pokemon
 # puts 'Migrating Trainers...'
 # migrate_trainers
-# puts 'Migrating Zones...'
-# migrate_zones
-# puts 'Migrating Groups...'
-# migrate_groups
+puts 'Migrating Zones...'
+migrate_zones
+puts 'Migrating Groups...'
+migrate_groups
 
 end_time = Time.now
 puts "Duration of generation : #{end_time - start_time} seconds"
-
 puts $errors.inspect

@@ -28,6 +28,63 @@ def prepare_folders
   FileUtils.mkdir_p('output/Data/Studio/groups')
 end
 
+def prepare_text_files
+  Dir.glob(File.join($essentials_path, 'Data/messages*core.dat')) do |file|
+    File.open(file, 'rb') do |f|
+      data = Marshal.load(f)
+      file_path = file.downcase
+      if file_path.include?('messages_core.dat') # English has no language code
+        $core_text_files[0] = data
+      else
+        $core_text_files[1] = data if file_path.include?('_fr')
+        $core_text_files[2] = data if file_path.include?('_it')
+        $core_text_files[3] = data if file_path.include?('_de') || file_path.include?('_ge')
+        $core_text_files[4] = data if file_path.include?('_es')
+        $core_text_files[5] = data if file_path.include?('_ko')
+        $core_text_files[6] = data if file_path.include?('_ja') || file_path.include?('_jp')
+      end
+    end
+  end
+
+  Dir.glob(File.join($essentials_path, 'Data/messages*game.dat')) do |file|
+    File.open(file, 'rb') do |f|
+      data = Marshal.load(f)
+      file_path = file.downcase
+      if file_path.include?('messages_game.dat') # English has no language code
+        $game_text_files[0] = data
+      else
+        $game_text_files[1] = data if file_path.include?('_fr')
+        $game_text_files[2] = data if file_path.include?('_it')
+        $game_text_files[3] = data if file_path.include?('_de') || file_path.include?('_ge')
+        $game_text_files[4] = data if file_path.include?('_es')
+        $game_text_files[5] = data if file_path.include?('_ko')
+        $game_text_files[6] = data if file_path.include?('_ja') || file_path.include?('_jp')
+      end
+    end
+  end
+
+  $abilities_names = CSV.open('output/Data/Text/Dialogs/100004.csv', 'a')
+  $abilities_descriptions = CSV.open('output/Data/Text/Dialogs/100005.csv', 'a')
+  $types_names = CSV.open('output/Data/Text/Dialogs/100003.csv', 'a')
+  $dexes_names = CSV.open('output/Data/Text/Dialogs/100063.csv', 'a')
+  $moves_names = CSV.open('output/Data/Text/Dialogs/100006.csv', 'a')
+  $moves_descriptions = CSV.open('output/Data/Text/Dialogs/100007.csv', 'a')
+  $items_names = CSV.open('output/Data/Text/Dialogs/100012.csv', 'a')
+  $items_plural_names = CSV.open('output/Data/Text/Dialogs/9001.csv', 'a')
+  $items_descriptions = CSV.open('output/Data/Text/Dialogs/100013.csv', 'a')
+  $pokemon_names = CSV.open('output/Data/Text/Dialogs/100000.csv', 'a')
+  $pokemon_categories = CSV.open('output/Data/Text/Dialogs/100001.csv', 'a')
+  $pokemon_descriptions = CSV.open('output/Data/Text/Dialogs/100002.csv', 'a')
+  $pokemon_form_names = CSV.open('output/Data/Text/Dialogs/100067.csv', 'a')
+  $pokemon_form_descriptions = CSV.open('output/Data/Text/Dialogs/100068.csv', 'a')
+  $trainers_type_names = CSV.open('output/Data/Text/Dialogs/100029.csv', 'a')
+  $trainers_names = CSV.open('output/Data/Text/Dialogs/100062.csv', 'a')
+  $trainers_lose_texts = CSV.open('output/Data/Text/Dialogs/100048.csv', 'a')
+  $zone_names = CSV.open('output/Data/Text/Dialogs/100010.csv', 'a')
+  $zone_description = CSV.open('output/Data/Text/Dialogs/100064.csv', 'a')
+  $group_names = CSV.open('output/Data/Text/Dialogs/100061.csv', 'a')
+end
+
 # Check if an entity contains a specific flag
 # @param entity [Object] the entity to check
 # @param flag [String] the flag to look for
@@ -83,42 +140,30 @@ CSV_HEADER = %w[en fr it de es ko kana]
 # @param text [String] the text to translate
 # @param file [String] the file in which the text translations are contained, 'core' or 'game'
 # @param section [Int] the section of the file in which the text translations are contained
-# @param csv_number [Int] the CSV name
-def translate_text(text, file_type, section, csv_number, offset: false)
-  line = ['', '', '', '', '', '']
-  Dir.glob(File.join($essentials_path, "Data/messages*#{file_type}.dat")) do |file|
-    File.open(file, 'rb') do |dat|
-      data = Marshal.load(dat)
-      if file.downcase.include?("messages_#{file_type}.dat") # English has no language code
-        line[0] = data[section][text].nil? ? text : data[section][text]
-      else
-        line[1] = data[section][text] if file.downcase.include?('_fr')
-        line[2] = data[section][text] if file.downcase.include?('_it')
-        line[3] = data[section][text] if file.downcase.include?('_de') || file.downcase.include?('_ge')
-        line[4] = data[section][text] if file.downcase.include?('_es')
-        line[5] = data[section][text] if file.downcase.include?('_ko')
-        line[6] = data[section][text] if file.downcase.include?('_ja') || file.downcase.include?('_jp')
-      end
-    end
+# @param csv_file [File] the CSV file
+def translate_text(text, file_type, section, csv_file, offset: false)
+  line = []
+  files = file_type == 'core' ? $core_text_files : $game_text_files
+  files.each do |data|
+    next if data[section].nil?
+
+    line << (data[section][text].nil? ? text : data[section][text])
   end
 
-  CSV.open(File.join("output/Data/Text/Dialogs/#{csv_number}.csv"), 'a') do |csv|
-    if File.zero?(csv) || !File.exist?(csv)
-      csv << CSV_HEADER
-      csv << %w[National National National National National National National] if csv_number == 100_063
-      csv << %w[- - - - - - -] if offset
-    end
-    line.map! { |t| t == '' ? line[0] : t }
-    csv << line
+  if File.zero?(csv_file) || !File.exist?(csv_file)
+    csv_file << CSV_HEADER
+    csv_file << %w[National National National National National National National] if $dexes_names == 100_063
+    csv_file << %w[- - - - - - -] if offset
   end
+  (7 - line.length).times { line << line[0] }
+  csv_file << line
+  csv_file.flush
 end
 
 # Generate a dummy CSV
 # @param text [String] the dummy text
-# @param csv_number [Int] the CSV name
-def generate_dummy_csv(text, csv_number)
-  CSV.open(File.join("output/Data/Text/Dialogs/#{csv_number}.csv"), 'a') do |csv|
-    csv << CSV_HEADER if File.zero?(csv) || !File.exist?(csv)
-    csv << [text, text, text, text, text, text, text]
-  end
+# @param csv_file [File] the CSV file
+def generate_dummy_csv(text, csv_file)
+  csv_file << CSV_HEADER if File.zero?(csv_file) || !File.exist?(csv_file)
+  csv_file << [text, text, text, text, text, text, text]
 end

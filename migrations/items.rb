@@ -54,9 +54,9 @@ def migrate_items
       $errors << "Error #{e} on #{db_symbol}"
     ensure
       i += 1
-      translate_text(item.real_name, 'core', 7, 100_012)
-      translate_text(item.real_name_plural, 'core', 8, 900_1)
-      translate_text(item.real_description, 'core', 9, 100_013)
+      translate_text(item.real_name, 'core', 7, $items_names)
+      translate_text(item.real_name_plural, 'core', 8, $items_plural_names)
+      translate_text(item.real_description, 'core', 9, $items_descriptions)
     end
   end
 end

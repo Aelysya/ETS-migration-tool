@@ -25,10 +25,11 @@ def migrate_groups
         $errors << "Error #{e} on group_#{i}"
       ensure
         i += 1
-        generate_dummy_csv("Group #{i}", 100_061)
+        generate_dummy_csv("Group #{i}", $group_names)
       end
     end
   end
+  $group_names.close
 end
 
 # Determine the systemTag linked to this group

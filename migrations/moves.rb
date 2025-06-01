@@ -60,10 +60,12 @@ def migrate_moves
       $errors << "Error #{e} on #{db_symbol}"
     ensure
       i += 1
-      translate_text(move.real_name, 'core', 5, 100_006)
-      translate_text(move.real_description, 'core', 6, 100_007)
+      translate_text(move.real_name, 'core', 5, $moves_names)
+      translate_text(move.real_description, 'core', 6, $moves_descriptions)
     end
   end
+  $moves_names.close
+  $moves_descriptions.close
 end
 
 # Determine a move's category based on a number

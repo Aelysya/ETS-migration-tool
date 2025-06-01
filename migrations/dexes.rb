@@ -76,6 +76,7 @@ def migrate_regional_dexes
       save_json("Data/Studio/dex/#{dex_name}.json", json)
     end
   end
+  $dexes_names.close
 end
 
 # Find the name of the dex by its index
@@ -85,7 +86,7 @@ def find_dex_name(dex_index)
   File.open(File.join($essentials_path, 'Data/town_map.dat'), 'rb') do |f|
     data = Marshal.load(f)
     name = data[dex_index].real_name.gsub(/ /, '')
-    translate_text(name, 'game', 18, 100_063)
+    translate_text(name, 'game', 18, $dexes_names)
     return name.downcase
   end
 end

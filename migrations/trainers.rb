@@ -48,6 +48,9 @@ def migrate_trainers
       translate_text(trainer.real_lose_text, 'game', 23, 100_048)
     end
   end
+  $trainers_type_names.close
+  $trainers_names.close
+  $trainers_lose_texts.close
 end
 
 # Find the corresponding trainer type of a trainer

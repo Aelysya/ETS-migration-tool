@@ -27,9 +27,10 @@ def migrate_types
       $errors << "Error #{e} on #{db_symbol}"
     ensure
       i += 1
-      translate_text(type.real_name, 'core', 12, 100_003)
+      translate_text(type.real_name, 'core', 12, $types_names)
     end
   end
+  $types_names.close
 end
 
 # Build the type effectivenesses element of the type JSON

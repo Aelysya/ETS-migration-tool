@@ -29,6 +29,11 @@ def migrate_pokemon
       save_json("Data/Studio/pokemon/#{db_symbol}.json", json)
     end
   end
+  $pokemon_names.close
+  $pokemon_categories.close
+  $pokemon_descriptions.close
+  $pokemon_form_names.close
+  $pokemon_form_descriptions.close
 end
 
 # Build the forms of a Pokémon
@@ -118,12 +123,12 @@ def build_forms(pokemon, number, data)
     $name_counter += 1
     $description_counter += 1 unless form_number == 0
     if form_number == 0
-      translate_text(p.real_name, 'core', 1, 100_000, offset: true)
-      translate_text(p.real_category, 'core', 2, 100_001, offset: true)
-      translate_text(p.real_pokedex_entry, 'core', 3, 100_002, offset: true)
+      translate_text(p.real_name, 'core', 1, $pokemon_names, offset: true)
+      translate_text(p.real_category, 'core', 2, $pokemon_categories, offset: true)
+      translate_text(p.real_pokedex_entry, 'core', 3, $pokemon_descriptions, offset: true)
     else
-      translate_text(p.real_form_name, 'core', 4, 100_067)
-      translate_text(p.real_pokedex_entry, 'core', 3, 100_068, offset: true)
+      translate_text(p.real_form_name, 'core', 4, $pokemon_form_names)
+      translate_text(p.real_pokedex_entry, 'core', 3, $pokemon_form_descriptions, offset: true)
     end
   end
   return forms

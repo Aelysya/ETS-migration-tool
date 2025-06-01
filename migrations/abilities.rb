@@ -5,8 +5,8 @@ def migrate_abilities
 
     i = 0
     data.each_value do |ability|
-      translate_text(ability.real_name, 'core', 10, 100_004)
-      translate_text(ability.real_description, 'core', 11, 100_005)
+      translate_text(ability.real_name, 'core', 10, $abilities_names)
+      translate_text(ability.real_description, 'core', 11, $abilities_descriptions)
       ability_name = ability.id.downcase.to_s
 
       # As One and Embody Aspect are a single abilities in Studio, so we skip these ones as they are duplicates
@@ -35,4 +35,6 @@ def migrate_abilities
       i += 1
     end
   end
+  $abilities_names.close
+  $abilities_descriptions.close
 end

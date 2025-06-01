@@ -30,10 +30,12 @@ def migrate_zones
       $errors << "Error #{e} on zone_#{i}"
     ensure
       i += 1
-      generate_dummy_csv("Zone #{i} description", 100_064)
-      translate_text(zone.real_name, 'game', 21, 100_010)
+      translate_text(zone.real_name, 'game', 21, $zone_names)
+      generate_dummy_csv("Zone #{i} description", $zone_description)
     end
   end
+  $zone_names.close
+  $zone_description.close
 end
 
 # Determine the weather linked to this zone
