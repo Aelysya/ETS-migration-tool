@@ -57,10 +57,7 @@ def build_forms(pokemon, number, data)
       existing_item = find_existing_entity(item_name, $existing_items)
       stone_db_symbol = existing_item.nil? ? item_name : existing_item['dbSymbol']
 
-      forms[p.unmega_form][:evolutions] << {
-        form: mega_form_counter,
-        conditions: [{ type: 'gemme', value: stone_db_symbol }]
-      }
+      forms[p.unmega_form][:evolutions] << { form: mega_form_counter, conditions: [{ type: 'gemme', value: stone_db_symbol }] }
       mega_form_counter += 1
     end
 

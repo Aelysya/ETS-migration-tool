@@ -85,8 +85,8 @@ end
 def find_dex_name(dex_index)
   File.open(File.join($essentials_path, 'Data/town_map.dat'), 'rb') do |f|
     data = Marshal.load(f)
-    name = data[dex_index].real_name.gsub(/ /, '')
+    name = data[dex_index].real_name
     translate_text(name, 'game', 18, $dexes_names)
-    return name.downcase
+    return name.downcase.gsub(/ /, '_')
   end
 end

@@ -28,6 +28,7 @@ def prepare_folders
   FileUtils.mkdir_p('output/Data/Studio/groups')
 end
 
+# Preload text .dat files for translations and create CSV files
 def prepare_text_files
   Dir.glob(File.join($essentials_path, 'Data/messages*core.dat')) do |file|
     File.open(file, 'rb') do |f|
@@ -152,7 +153,7 @@ def translate_text(text, file_type, section, csv_file, offset: false)
 
   if File.zero?(csv_file) || !File.exist?(csv_file)
     csv_file << CSV_HEADER
-    csv_file << %w[National National National National National National National] if $dexes_names == 100_063
+    csv_file << %w[National National National National National National National] if csv_file == $dexes_names
     csv_file << %w[- - - - - - -] if offset
   end
   (7 - line.length).times { line << line[0] }
