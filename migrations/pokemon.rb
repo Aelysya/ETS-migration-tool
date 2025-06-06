@@ -1,6 +1,6 @@
 # Text IDs counters
 $name_counter = 0
-$description_counter = 0
+$description_counter = 1
 
 # Migrate Essentials Pokemon into Studio format
 def migrate_pokemon
@@ -26,6 +26,7 @@ def migrate_pokemon
         forms: build_forms(pokemon, i, data)
       }
 
+      i += 1
       save_json("Data/Studio/pokemon/#{db_symbol}.json", json)
     end
   end
@@ -112,21 +113,22 @@ def build_forms(pokemon, number, data)
         description: form_number == 0 ? 0 : $description_counter
       }
     }
-  rescue => e
-    $errors << "Error #{e} on #{db_symbol}"
-  ensure
-    i += 1
     form_counter += 1
     $name_counter += 1
     $description_counter += 1 unless form_number == 0
     if form_number == 0
-      translate_text(p.real_name, 'core', 1, $pokemon_names, offset: true)
+      translate_text(p.real_name, 'core', 1, $pokemon_names)
       translate_text(p.real_category, 'core', 2, $pokemon_categories, offset: true)
       translate_text(p.real_pokedex_entry, 'core', 3, $pokemon_descriptions, offset: true)
+      translate_text(p.real_name, 'core', 4, $pokemon_form_names)
     else
       translate_text(p.real_form_name, 'core', 4, $pokemon_form_names)
-      translate_text(p.real_pokedex_entry, 'core', 3, $pokemon_form_descriptions, offset: true)
+      translate_text(p.real_pokedex_entry, 'core', 3, $pokemon_form_descriptions)
     end
+  rescue => e
+    $errors << "Error #{e} on #{p.species}"
+  ensure
+    i += 1
   end
   return forms
 end
@@ -341,7 +343,7 @@ def build_moveset_element(pokemon)
     move_name = move[1].downcase.to_s
     existing_move = find_existing_entity(move_name, $existing_moves)
     move_set << {
-      dbSymbol: existing_move.nil? ? move_name : existing_move['dbSymbol'],
+      move: existing_move.nil? ? move_name : existing_move['dbSymbol'],
       klass: 'LevelLearnableMove',
       level: move[0].clamp(1, 999)
     }
@@ -349,7 +351,7 @@ def build_moveset_element(pokemon)
     next unless move[0] == 0
 
     move_set << {
-      dbSymbol: existing_move.nil? ? move_name : existing_move['dbSymbol'],
+      move: existing_move.nil? ? move_name : existing_move['dbSymbol'],
       klass: 'EvolutionLearnableMove'
     }
   end
@@ -358,11 +360,11 @@ def build_moveset_element(pokemon)
     move_name = move.downcase.to_s
     existing_move = find_existing_entity(move_name, $existing_moves)
     move_set << {
-      dbSymbol: existing_move.nil? ? move_name : existing_move['dbSymbol'],
+      move: existing_move.nil? ? move_name : existing_move['dbSymbol'],
       klass: 'TechLearnableMove'
     }
     move_set << {
-      dbSymbol: existing_move.nil? ? move_name : existing_move['dbSymbol'],
+      move: existing_move.nil? ? move_name : existing_move['dbSymbol'],
       klass: 'TutorLearnableMove'
     }
   end
@@ -371,7 +373,7 @@ def build_moveset_element(pokemon)
     move_name = move.downcase.to_s
     existing_move = find_existing_entity(move_name, $existing_moves)
     move_set << {
-      dbSymbol: existing_move.nil? ? move_name : existing_move['dbSymbol'],
+      move: existing_move.nil? ? move_name : existing_move['dbSymbol'],
       klass: 'BreedLearnableMove'
     }
   end
@@ -416,7 +418,8 @@ def build_evolutions(pokemon)
 
   # These Pokémon have a function in one of their evolutions conditions, so we fetch their evolutions from the datapack
   if %w[basculin bisharp bramblin dunsparce eevee farfetch_d gimmighoul inkay mantyke milcery
-        pancham pawmo primeape rellor tandemaus toxel tyrogue ursaring wurmple qwilfish primeape stantler].include?(db_symbol)
+        pancham pawmo primeape rellor tandemaus toxel tyrogue ursaring wurmple qwilfish primeape stantler].include?(db_symbol) &&
+     !existing_pokemon['forms'][pokemon.form].nil?
     return existing_pokemon['forms'][pokemon.form]['evolutions']
   end
 

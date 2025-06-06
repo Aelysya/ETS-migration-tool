@@ -154,6 +154,8 @@ def translate_text(text, file_type, section, csv_file, offset: false)
   if File.zero?(csv_file) || !File.exist?(csv_file)
     csv_file << CSV_HEADER
     csv_file << %w[National National National National National National National] if csv_file == $dexes_names
+    csv_file << %w[Egg Œuf Uovo Ei Huevo 알 タマゴ] if csv_file == $pokemon_names
+    csv_file << %w[[~0] [~0] [~0] [~0] [~0] [~0] [~0]] if csv_file == $pokemon_form_descriptions
     csv_file << %w[- - - - - - -] if offset
   end
   (7 - line.length).times { line << line[0] }

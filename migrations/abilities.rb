@@ -10,7 +10,7 @@ def migrate_abilities
       ability_name = ability.id.downcase.to_s
 
       # As One and Embody Aspect are a single abilities in Studio, so we skip these ones as they are duplicates
-      next i += 1 if %w[asonegrimneigh embodyaspect_1 embodyaspect_2 embodyaspect_3].include?(ability_name)
+      next if %w[asonegrimneigh embodyaspect_1 embodyaspect_2 embodyaspect_3].include?(ability_name)
 
       if ability_name == 'asonechillingneigh'
         db_symbol = 'as_one'

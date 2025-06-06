@@ -200,7 +200,7 @@ def parse_move_stats(move_function)
         modificator: stat[:direction] == 'Raise' ? stat[:value] : -stat[:value]
       }
       move_stats_element << {
-        battleStage: 'DEF_STAGE',
+        battleStage: 'DFE_STAGE',
         modificator: stat[:direction] == 'Raise' ? stat[:value] : -stat[:value]
       }
       move_stats_element << {
@@ -236,7 +236,7 @@ def parse_stat(stat)
   when 'Atk', 'Attack'
     return 'ATK_STAGE'
   when 'Def', 'Defense'
-    return 'DEF_STAGE'
+    return 'DFE_STAGE'
   when 'SpAtk'
     return 'ATS_STAGE'
   when 'SpDef'

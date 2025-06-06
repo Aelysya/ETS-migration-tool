@@ -1,24 +1,24 @@
 # Migrate Essentials types into Studio format
 def migrate_types
-  # File.open("Data/messages_core.dat", "rb") do |f|
   File.open(File.join($essentials_path, 'Data/types.dat'), 'rb') do |f|
     data = Marshal.load(f)
+    puts data.inspect
 
-    i = 0
+    # Double loop to process custom type after the existing ones
     data.each_value do |type|
       type_name = type.id.downcase.to_s
-      next if type_name == 'qmarks'
-
       existing_type = find_existing_entity(type_name, $existing_types)
       type_exists = !existing_type.nil?
-      db_symbol = type_exists ? existing_type['dbSymbol'] : type_name
+      next unless type_exists
+
+      db_symbol = existing_type['dbSymbol']
 
       json = {
-        textId: type_exists ? existing_type['textId'] : i,
+        textId: existing_type['textId'],
         klass: 'Type',
-        id: type_exists ? existing_type['id'] : i + 1,
+        id: existing_type['id'],
         dbSymbol: db_symbol,
-        color: type_exists ? existing_type['color'] : '#c3b5b2',
+        color: existing_type['color'],
         damageTo: build_damage_to(data, type_name)
       }
 
@@ -26,8 +26,33 @@ def migrate_types
     rescue => e
       $errors << "Error #{e} on #{db_symbol}"
     ensure
-      i += 1
-      translate_text(type.real_name, 'core', 12, $types_names)
+      translate_text(type.real_name, 'core', 12, $types_names) if type_exists
+    end
+
+    custom_type_counter = 18
+    data.each_value do |type|
+      type_name = type.id.downcase.to_s
+      existing_type = find_existing_entity(type_name, $existing_types)
+      type_exists = !existing_type.nil?
+      next if type_name == 'qmarks' || type_exists
+
+      db_symbol = type_name
+
+      json = {
+        textId: custom_type_counter,
+        klass: 'Type',
+        id: custom_type_counter + 1,
+        dbSymbol: db_symbol,
+        color: '#c3b5b2',
+        damageTo: build_damage_to(data, type_name)
+      }
+
+      save_json("Data/Studio/types/#{db_symbol}.json", json)
+    rescue => e
+      $errors << "Error #{e} on #{db_symbol}"
+    ensure
+      custom_type_counter += 1
+      translate_text(type.real_name, 'core', 12, $types_names) unless type_exists || type_name == 'qmarks'
     end
   end
   $types_names.close

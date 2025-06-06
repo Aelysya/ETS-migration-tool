@@ -15,20 +15,21 @@ def migrate_items
         klass: klass,
         id: i,
         dbSymbol: db_symbol,
-        icon: i,
+        icon: i.to_s,
         price: item.price,
         socket: parse_item_socket(item.pocket),
         position: 0,
         isBattleUsable: item_exists ? existing_item['isBattleUsable'] : item.battle_use != 0,
         isMapUsable: item_exists ? existing_item['isMapUsable'] : item.field_use != 0,
         isLimited: item.consumable,
-        isHoldable: item_exists ? existing_item['isHoldable'] : klass != 'KeyItem',
+        isHoldable: item_exists ? existing_item['isHoldable'] : !check_for_flag(item, 'KeyItem'),
         flingPower: parse_fling_power(item)
       }
 
+      json['eventId'] = item_exists ? existing_item['eventId'] : 0 if klass == 'EventItem'
       json['repelCount'] = item_exists ? existing_item['repelCount'] : 100 if klass == 'RepelItem'
       json['catchRate'] = item_exists ? existing_item['catchRate'] : 1.0 if klass == 'BallItem'
-      json['color'] = item_exists ? existing_item['color'] : { red: 255, geen: 0, blue: 0, alpha: 255 } if klass == 'BallItem'
+      json['color'] = item_exists ? existing_item['color'] : { red: 255, green: 0, blue: 0, alpha: 255 } if klass == 'BallItem'
       json['spriteFilename'] = item_exists ? existing_item['spriteFilename'] : 'ball_1' if klass == 'BallItem'
 
       if klass == 'TechItem'
@@ -66,7 +67,6 @@ end
 # @param existing_item [Object | nil] the existing item from Studio
 # @return [String] the klass of the item
 def parse_klass(item, existing_item)
-  return 'KeyItem' if check_for_flag(item, 'KeyItem')
   return 'RepelItem' if check_for_flag(item, 'Repel')
   return 'StoneItem' if check_for_flag(item, 'EvolutionStone')
   return 'BallItem' if check_for_flag(item, 'PokeBall')

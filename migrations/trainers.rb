@@ -43,9 +43,9 @@ def migrate_trainers
       $errors << "Error #{e} on #{db_symbol}"
     ensure
       i += 1
-      translate_text(trainer_type.real_name, 'core', 13, 100_029)
-      translate_text(trainer.real_name, 'game', 14, 100_062)
-      translate_text(trainer.real_lose_text, 'game', 23, 100_048)
+      translate_text(trainer_type.real_name, 'core', 13, $trainers_type_names)
+      translate_text(trainer.real_name, 'game', 14, $trainers_names)
+      translate_text(trainer.real_lose_text, 'game', 23, $trainers_lose_texts)
     end
   end
   $trainers_type_names.close

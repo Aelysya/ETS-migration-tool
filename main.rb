@@ -52,10 +52,10 @@ puts 'Migrating Pokédexes...'
 migrate_dexes
 puts 'Migrating Items...'
 migrate_items
-# puts 'Migrating Pokémon...'
-# migrate_pokemon
-# puts 'Migrating Trainers...'
-# migrate_trainers
+puts 'Migrating Pokémon...'
+migrate_pokemon
+puts 'Migrating Trainers...'
+migrate_trainers
 puts 'Migrating Zones...'
 migrate_zones
 puts 'Migrating Groups...'
