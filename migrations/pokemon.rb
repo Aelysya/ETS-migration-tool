@@ -524,56 +524,56 @@ def copy_pokemon_resources(pokemon, form, number)
   shiny_f_resource = "#{main_part}sf#{form_part}"
 
   graphics_source = File.join($essentials_path, 'Graphics/Pokemon')
-  Dir.glob(File.join(graphics_source, "Back/#{source_file_name}*")) do |file|
-    ext = File.extname(file)
+  Dir.glob(File.join(graphics_source, "Back/#{source_file_name}{,_female}.png")) do |file|
+    ext = File.extname(file).downcase
     has_female = true if file.downcase.include?('_female')
     dest = File.join('output/graphics/pokedex/pokeback', "#{file.downcase.include?('_female') ? female_resource : basic_resource}#{ext}")
     FileUtils.cp(file, dest)
   end
 
-  Dir.glob(File.join(graphics_source, "Back shiny/#{source_file_name}*")) do |file|
-    ext = File.extname(file)
+  Dir.glob(File.join(graphics_source, "Back shiny/#{source_file_name}{,_female}.png")) do |file|
+    ext = File.extname(file).downcase
     has_female = true if file.downcase.include?('_female')
     dest = File.join('output/graphics/pokedex/pokebackshiny', "#{file.downcase.include?('_female') ? shiny_f_resource : shiny_resource}#{ext}")
     FileUtils.cp(file, dest)
   end
 
-  Dir.glob(File.join(graphics_source, "Front/#{source_file_name}*")) do |file|
-    ext = File.extname(file)
+  Dir.glob(File.join(graphics_source, "Front/#{source_file_name}{,_female}.png")) do |file|
+    ext = File.extname(file).downcase
     has_female = true if file.downcase.include?('_female')
     dest = File.join('output/graphics/pokedex/pokefront', "#{file.downcase.include?('_female') ? female_resource : basic_resource}#{ext}")
     FileUtils.cp(file, dest)
   end
 
-  Dir.glob(File.join(graphics_source, "Front shiny/#{source_file_name}*")) do |file|
-    ext = File.extname(file)
+  Dir.glob(File.join(graphics_source, "Front shiny/#{source_file_name}{,_female}.png")) do |file|
+    ext = File.extname(file).downcase
     has_female = true if file.downcase.include?('_female')
     dest = File.join('output/graphics/pokedex/pokefrontshiny', "#{file.downcase.include?('_female') ? shiny_f_resource : shiny_resource}#{ext}")
     FileUtils.cp(file, dest)
   end
 
-  Dir.glob(File.join(graphics_source, "Icons/#{source_file_name}*")) do |file|
-    ext = File.extname(file)
+  Dir.glob(File.join(graphics_source, "Icons/#{source_file_name}{,_female}.png")) do |file|
+    ext = File.extname(file).downcase
     has_female = true if file.downcase.include?('_female')
     dest = File.join('output/graphics/pokedex/pokeicon', "#{file.downcase.include?('_female') ? female_resource : basic_resource}#{ext}")
     FileUtils.cp(file, dest)
   end
 
-  Dir.glob(File.join(graphics_source, "Icons shiny/#{source_file_name}*")) do |file|
-    ext = File.extname(file)
+  Dir.glob(File.join(graphics_source, "Icons shiny/#{source_file_name}{,_female}.png")) do |file|
+    ext = File.extname(file).downcase
     has_female = true if file.downcase.include?('_female')
     dest = File.join('output/graphics/pokedex/pokeicon', "#{file.downcase.include?('_female') ? shiny_f_resource : shiny_resource}#{ext}")
     FileUtils.cp(file, dest)
   end
 
-  Dir.glob(File.join(graphics_source, "Footprints/#{source_file_name}*")) do |file|
-    ext = File.extname(file)
+  Dir.glob(File.join(graphics_source, "Footprints/#{source_file_name}.png")) do |file|
+    ext = File.extname(file).downcase
     dest = File.join('output/graphics/pokedex/footprints', "#{basic_resource}#{ext}")
     FileUtils.cp(file, dest)
   end
 
-  Dir.glob(File.join($essentials_path, "Graphics/Characters/#{source_file_name}*")) do |file|
-    ext = File.extname(file)
+  Dir.glob(File.join($essentials_path, "Graphics/Characters/#{source_file_name}{,_female}.png")) do |file|
+    ext = File.extname(file).downcase
     if file.include?('_s') || file.include?('s_') || file.include?('shiny')
       dest = File.join('output/graphics/characters', "#{shiny_resource}#{ext}")
     else
@@ -583,7 +583,7 @@ def copy_pokemon_resources(pokemon, form, number)
   end
 
   Dir.glob(File.join($essentials_path, "Audio/SE/Cries/#{source_file_name}*")) do |file|
-    ext = File.extname(file)
+    ext = File.extname(file).downcase
     dest = File.join('output/audio/se/cries', "#{basic_resource}#{ext}")
     FileUtils.cp(file, dest)
   end
