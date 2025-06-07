@@ -2,7 +2,6 @@
 def migrate_types
   File.open(File.join($essentials_path, 'Data/types.dat'), 'rb') do |f|
     data = Marshal.load(f)
-    puts data.inspect
 
     # Double loop to process custom type after the existing ones
     data.each_value do |type|
@@ -47,11 +46,11 @@ def migrate_types
         damageTo: build_damage_to(data, type_name)
       }
 
+      custom_type_counter += 1
       save_json("Data/Studio/types/#{db_symbol}.json", json)
     rescue => e
       $errors << "Error #{e} on #{db_symbol}"
     ensure
-      custom_type_counter += 1
       translate_text(type.real_name, 'core', 12, $types_names) unless type_exists || type_name == 'qmarks'
     end
   end

@@ -24,8 +24,8 @@ def migrate_groups
       rescue => e
         $errors << "Error #{e} on group_#{i}"
       ensure
-        i += 1
         generate_dummy_csv("Group #{i}", $group_names)
+        i += 1
       end
     end
   end

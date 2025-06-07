@@ -169,4 +169,5 @@ end
 def generate_dummy_csv(text, csv_file)
   csv_file << CSV_HEADER if File.zero?(csv_file) || !File.exist?(csv_file)
   csv_file << [text, text, text, text, text, text, text]
+  csv_file.flush
 end

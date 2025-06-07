@@ -29,9 +29,9 @@ def migrate_zones
     rescue => e
       $errors << "Error #{e} on zone_#{i}"
     ensure
-      i += 1
       translate_text(zone.real_name, 'game', 21, $zone_names)
       generate_dummy_csv("Zone #{i} description", $zone_description)
+      i += 1
     end
   end
   $zone_names.close

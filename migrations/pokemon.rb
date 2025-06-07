@@ -46,13 +46,13 @@ def build_forms(pokemon, number, data)
   forms = []
 
   mega_form_counter = 30
-  form_counter = 0
+  # form_counter = 0
   i = 0
   data.each_value do |p|
     next unless p.species == pokemon.species
     next if p.species.downcase.to_s == 'alcremie' && p.form != 0
 
-    form_number = p.mega_stone.nil? && p.mega_move.nil? ? form_counter : mega_form_counter
+    form_number = p.mega_stone.nil? && p.mega_move.nil? ? p.form : mega_form_counter
     if form_number >= 30 && !p.mega_stone.nil?
       item_name = p.mega_stone.downcase.to_s
       existing_item = find_existing_entity(item_name, $existing_items)
@@ -68,7 +68,7 @@ def build_forms(pokemon, number, data)
     second_egg_group = p.egg_groups[1].nil? ? first_egg_group : parse_egg_group(p.egg_groups[1])
 
     baby_db_symbol = find_baby(p, data)
-    baby_name_with_form = "#{baby_db_symbol.upcase.gsub(/_/, '')}_#{form_counter}"
+    baby_name_with_form = "#{baby_db_symbol.upcase.gsub(/_/, '')}_#{p.form}"
 
     evolution_element = build_evolutions(p)
 
@@ -102,7 +102,7 @@ def build_forms(pokemon, number, data)
       ],
       hatchSteps: p.hatch_steps,
       babyDbSymbol: baby_db_symbol,
-      babyForm: data[baby_name_with_form.to_sym].nil? ? 0 : form_counter,
+      babyForm: data[baby_name_with_form.to_sym].nil? ? 0 : p.form,
       itemHeld: parse_items(p),
       abilities: parse_abilities(p),
       frontOffsetY: 0,
@@ -113,7 +113,7 @@ def build_forms(pokemon, number, data)
         description: form_number == 0 ? 0 : $description_counter
       }
     }
-    form_counter += 1
+    # form_counter += 1
     $name_counter += 1
     $description_counter += 1 unless form_number == 0
     if form_number == 0

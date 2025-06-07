@@ -229,7 +229,10 @@ def parse_pokemon_ability(pokemon)
 
     generated_pokemon = JSON.parse(File.read(File.join('output/Data/Studio/pokemon', "#{db_symbol}.json")))
     form = pokemon[:form].nil? ? 0 : pokemon[:form]
-    return generated_pokemon['forms'][form]['abilities'][pokemon[:ability_index]]
+    generated_pokemon['forms'].each do |f|
+      return f['abilities'][pokemon[:ability_index]] if f['form'] == form
+    end
+    # return generated_pokemon['forms'][form]['abilities'][pokemon[:ability_index]]
   end
 end
 
