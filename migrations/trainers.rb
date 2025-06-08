@@ -46,6 +46,7 @@ def migrate_trainers
       translate_text(trainer_type.real_name, 'core', 13, $trainers_type_names)
       translate_text(trainer.real_name, 'game', 14, $trainers_names)
       translate_text(trainer.real_lose_text, 'game', 23, $trainers_lose_texts)
+      generate_dummy_csv('Win text', $trainers_win_texts)
     end
   end
   $trainers_type_names.close
@@ -157,7 +158,7 @@ def build_party(trainer)
 
     party << {
       specie: db_symbol,
-      form: pokemon[:form].nil? ? 0 : pokemon[:form],
+      form: pokemon[:form].nil? ? 0 : $pokemon_form_translation[pokemon[:species]].index(pokemon[:form]),
       shinySetup: {
         kind: 'rate',
         rate: shiny_rate
@@ -223,16 +224,15 @@ def parse_pokemon_ability(pokemon)
     return existing_ability.nil? ? ability_name : existing_ability['dbSymbol']
   else
     pokemon_name = pokemon[:species].downcase.to_s
-    pokemon_name.chop! if %w[nidoranfe nidoranma].include?(pokemon_name) # Nidoran species are named differently in Essentials
+    pokemon_name.chop! if %w[nidoranfe nidoranma].include?(pokemon_name)
     existing_pokemon = find_existing_entity(pokemon_name, $existing_species)
     db_symbol = existing_pokemon.nil? ? pokemon_name : existing_pokemon['dbSymbol']
 
     generated_pokemon = JSON.parse(File.read(File.join('output/Data/Studio/pokemon', "#{db_symbol}.json")))
-    form = pokemon[:form].nil? ? 0 : pokemon[:form]
+    form = pokemon[:form].nil? ? 0 : $pokemon_form_translation[pokemon[:species]].index(pokemon[:form])
     generated_pokemon['forms'].each do |f|
       return f['abilities'][pokemon[:ability_index]] if f['form'] == form
     end
-    # return generated_pokemon['forms'][form]['abilities'][pokemon[:ability_index]]
   end
 end
 

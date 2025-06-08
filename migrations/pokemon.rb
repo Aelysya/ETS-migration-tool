@@ -1,6 +1,7 @@
 # Text IDs counters
 $name_counter = 0
 $description_counter = 1
+$pokemon_form_translation = {}
 
 # Migrate Essentials Pokemon into Studio format
 def migrate_pokemon
@@ -15,6 +16,7 @@ def migrate_pokemon
       next if processed_species.include?(pokemon_name) # Skip already processed alt forms
 
       processed_species << pokemon_name
+      $pokemon_form_translation[pokemon.species] = []
 
       existing_pokemon = find_existing_entity(pokemon_name, $existing_species)
       db_symbol = existing_pokemon.nil? ? pokemon_name : existing_pokemon['dbSymbol']
@@ -46,21 +48,24 @@ def build_forms(pokemon, number, data)
   forms = []
 
   mega_form_counter = 30
-  # form_counter = 0
+  form_counter = 0
   i = 0
   data.each_value do |p|
     next unless p.species == pokemon.species
     next if p.species.downcase.to_s == 'alcremie' && p.form != 0
 
-    form_number = p.mega_stone.nil? && p.mega_move.nil? ? p.form : mega_form_counter
+    form_number = p.mega_stone.nil? && p.mega_move.nil? ? form_counter : mega_form_counter
     if form_number >= 30 && !p.mega_stone.nil?
       item_name = p.mega_stone.downcase.to_s
       existing_item = find_existing_entity(item_name, $existing_items)
       stone_db_symbol = existing_item.nil? ? item_name : existing_item['dbSymbol']
 
-      forms[p.unmega_form][:evolutions] << { form: mega_form_counter, conditions: [{ type: 'gemme', value: stone_db_symbol }] }
+      unmega_form = $pokemon_form_translation[pokemon.species].index(p.unmega_form)
+      forms[unmega_form][:evolutions] << { form: mega_form_counter, conditions: [{ type: 'gemme', value: stone_db_symbol }] }
       mega_form_counter += 1
     end
+
+    $pokemon_form_translation[pokemon.species] << (form_number > 29 ? form_number : p.form)
 
     has_female = copy_pokemon_resources(p, form_number, number)
 
@@ -70,7 +75,7 @@ def build_forms(pokemon, number, data)
     baby_db_symbol = find_baby(p, data)
     baby_name_with_form = "#{baby_db_symbol.upcase.gsub(/_/, '')}_#{p.form}"
 
-    evolution_element = build_evolutions(p)
+    evolution_element = build_evolutions(p, form_number)
 
     forms << {
       form: form_number,
@@ -96,13 +101,10 @@ def build_forms(pokemon, number, data)
       baseLoyalty: p.happiness,
       catchRate: p.catch_rate,
       femaleRate: parse_female_rate(p.gender_ratio),
-      breedGroups: [
-        first_egg_group,
-        second_egg_group
-      ],
+      breedGroups: [first_egg_group, second_egg_group],
       hatchSteps: p.hatch_steps,
       babyDbSymbol: baby_db_symbol,
-      babyForm: data[baby_name_with_form.to_sym].nil? ? 0 : p.form,
+      babyForm: data[baby_name_with_form.to_sym].nil? ? 0 : form_number,
       itemHeld: parse_items(p),
       abilities: parse_abilities(p),
       frontOffsetY: 0,
@@ -113,7 +115,7 @@ def build_forms(pokemon, number, data)
         description: form_number == 0 ? 0 : $description_counter
       }
     }
-    # form_counter += 1
+    form_counter += 1
     $name_counter += 1
     $description_counter += 1 unless form_number == 0
     if form_number == 0
@@ -410,7 +412,7 @@ end
 # Build the evolutions of a Pokémon
 # @param pokemon [Object] the Pokémon from Essentials
 # @return [Array] the evolutions of the Pokémon
-def build_evolutions(pokemon)
+def build_evolutions(pokemon, form_number)
   pokemon_name = pokemon.species.downcase.to_s
   pokemon_name.chop! if %w[nidoranfe nidoranma].include?(pokemon_name) # Nidoran species are named differently in Essentials
   existing_pokemon = find_existing_entity(pokemon_name, $existing_species)
@@ -433,7 +435,7 @@ def build_evolutions(pokemon)
 
     evolutions_element << {
       dbSymbol: evolution_db_symbol,
-      form: pokemon.form,
+      form: form_number,
       conditions: parse_evolution_conditions(evolution[1], evolution[2]) || []
     }
   end

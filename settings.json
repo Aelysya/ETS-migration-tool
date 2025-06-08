@@ -1,5 +1,4 @@
 {
   "essentials_path": "C:/path/to/your/essentials/project/root/folder",
-  "datapacks_path": "C:/path/to/the/datapacks/directory",
-  "resize_sprites": false
+  "datapacks_path": "C:/path/to/the/datapacks/directory/GameDataPacks"
 }

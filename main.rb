@@ -4,7 +4,6 @@ require 'fileutils'
 require_relative 'utils'
 
 $settings = JSON.parse(File.read('settings.local.json'))
-$resize_sprites = $settings['resize_sprites']
 $essentials_path = $settings['essentials_path']
 $essentials_script_path = File.join($essentials_path, 'Data/Scripts')
 $datapacks_path = File.join($settings['datapacks_path'], 'Gen 9/scarlet-violet')

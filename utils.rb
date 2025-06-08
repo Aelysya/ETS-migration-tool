@@ -80,6 +80,7 @@ def prepare_text_files
   $pokemon_form_descriptions = CSV.open('output/Data/Text/Dialogs/100068.csv', 'a')
   $trainers_type_names = CSV.open('output/Data/Text/Dialogs/100029.csv', 'a')
   $trainers_names = CSV.open('output/Data/Text/Dialogs/100062.csv', 'a')
+  $trainers_win_texts = CSV.open('output/Data/Text/Dialogs/100047.csv', 'a')
   $trainers_lose_texts = CSV.open('output/Data/Text/Dialogs/100048.csv', 'a')
   $zone_names = CSV.open('output/Data/Text/Dialogs/100010.csv', 'a')
   $zone_description = CSV.open('output/Data/Text/Dialogs/100064.csv', 'a')
